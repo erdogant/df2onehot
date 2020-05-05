@@ -42,14 +42,17 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
         Print message to screen. The default is 3.
         0: (default), 1: ERROR, 2: WARN, 3: INFO, 4: DEBUG, 5: TRACE
 
-
     Returns
     -------
-    dict containing:
-    out['numeric'] : Numerica values
-    out['onehot'] : One-hot matrix
-    out['labx'] : class labels
-    out['dtypes'] : transformed dtypes
+    dict:
+    numeric : DataFrame
+        Input-dataframe with converted numerical values
+    onehot : DataFrame
+        Input-dataframe with converted one-hot values. Note that continues values are removed.
+    labx : list of str
+        Input feature-labels or names
+    dtypes : list of str
+        The set dtypes for the feature-labels. These can be of type 'num' (numerical) or 'cat' (categorical).
 
     Examples
     --------
