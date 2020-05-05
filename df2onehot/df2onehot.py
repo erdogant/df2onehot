@@ -105,7 +105,7 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
                 # binary encode
                 onehot_encoded = onehot_encoder.fit_transform(integer_encoded.reshape(-1, 1))
                 # Remove columns if it does not fullfill minimum nr. of samples (>=y_min)
-                if not isinstance(y_min, type(None)):
+                if y_min is not None:
                     onehot_encoded = onehot_encoded[:,onehot_encoded.sum(axis=0)>=y_min]
                 # Make new one-hot columns
                 for k in range(0,onehot_encoded.shape[1]):
@@ -127,11 +127,19 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
     # idx = np.argsort(ycounts)[::-1]
     # print(np.c_[uiy[idx], ycounts[idx]])
 
+    # Make sure its limited to the number of y_min
+    labx = np.array(labx, dtype=str)
+    dtypes = np.array(dtypes)
+    if y_min is not None:
+        Iloc = (out_onehot.sum(axis=0)>=y_min).values
+        out_onehot = out_onehot.loc[:,Iloc]
+        labx=labx[Iloc]
+
     out = {}
     out['numeric'] = out_numeric
+    out['dtypes'] = dtypes
     out['onehot'] = out_onehot
-    out['labx'] = np.array(labx, dtype=str)
-    out['dtypes'] = np.array(dtypes)
+    out['labx'] = labx
     return(out)
 
 
