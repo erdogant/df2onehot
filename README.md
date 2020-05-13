@@ -3,7 +3,8 @@
 [![Python](https://img.shields.io/pypi/pyversions/df2onehot)](https://img.shields.io/pypi/pyversions/df2onehot)
 [![PyPI Version](https://img.shields.io/pypi/v/df2onehot)](https://pypi.org/project/df2onehot/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/erdogant/df2onehot/blob/master/LICENSE)
-[![Downloads](https://pepy.tech/badge/df2onehot/week)](https://pepy.tech/project/df2onehot/week)
+[![Downloads](https://pepy.tech/badge/df2onehot/month)](https://pepy.tech/project/df2onehot/month)
+[![Downloads](https://pepy.tech/badge/df2onehot)](https://pepy.tech/project/df2onehot)
 [![Donate](https://img.shields.io/badge/donate-grey.svg)](https://erdogant.github.io/donate/?currency=USD&amount=5)
 
 * df2onehot is Python package
