@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/erdogant/df2onehot/blob/master/LICENSE)
 [![Downloads](https://pepy.tech/badge/df2onehot/month)](https://pepy.tech/project/df2onehot/month)
 [![Downloads](https://pepy.tech/badge/df2onehot)](https://pepy.tech/project/df2onehot)
-[![Donate](https://img.shields.io/badge/donate-grey.svg)](https://erdogant.github.io/donate/?currency=USD&amount=5)
+[![Coffee](https://img.shields.io/badge/-coffee-grey.svg)](https://erdogant.github.io/donate/?currency=USD&amount=5)
 
 * df2onehot is Python package
 
