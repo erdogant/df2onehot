@@ -7,7 +7,9 @@
 [![Downloads](https://pepy.tech/badge/df2onehot)](https://pepy.tech/project/df2onehot)
 [![Coffee](https://img.shields.io/badge/-coffee-grey.svg)](https://erdogant.github.io/donate/?currency=USD&amount=5)
 
-* df2onehot is Python package
+  Star it if you like it!
+
+* df2onehot is Python package to convert your complex dataframe into a one-hot dense array.
 
 ### Contents
 - [Installation](#-installation)
