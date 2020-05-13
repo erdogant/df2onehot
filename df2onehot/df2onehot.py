@@ -68,7 +68,9 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
     args['list_expand'] = list_expand
     args['excl_background'] = excl_background
     labx = []
-
+    
+    # Reset index
+    df.reset_index(drop=True, inplace=True)
     # Determine Dtypes
     [df, dtypes] = set_dtypes(df, args['dtypes'], is_list=args['list_expand'], perc_min_num=args['perc_min_num'], verbose=args['verbose'])
     # If any column is a list, also expand the list!
