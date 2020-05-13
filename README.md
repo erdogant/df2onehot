@@ -70,5 +70,5 @@ out = df2onehot.df2onehot(df, y_min=2, perc_min_num=0.8)
 #### Licence
 See [LICENSE](LICENSE) for details.
 
-#### Donation
-* This work is created and maintained in my free time. If you wish to buy me a <a href="https://erdogant.github.io/donate/?currency=USD&amount=5">Coffee</a> for this work, it is very appreciated.
+#### Coffee
+If you wish to buy me a <a href="https://erdogant.github.io/donate/?currency=USD&amount=5">Coffee</a> for this work, it is very appreciated :)
