@@ -1,11 +1,11 @@
 # pytest tests\test_df2onehot.py
-
+import pandas as pd
 import numpy as np
 from df2onehot import df2onehot, import_example
-df = import_example()
 
 
 def test_df2onehot():
+    df = import_example()
     # TEST 1: check output is unchanged
     out = df2onehot(df)
     assert [*out.keys()]==['numeric','dtypes','onehot','labx']
