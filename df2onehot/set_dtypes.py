@@ -91,7 +91,9 @@ def _auto_dtypes(df, dtypes, is_list=False, perc_min_num=None, num_if_decimal=Tr
             # Force numerical if unique elements are above percentage
             if (perc_min_num is not None) and (('float' in str(df.dtypes[i])) or ('int' in str(df.dtypes[i]))):
                 tmpvalues=df.iloc[:,i].dropna().astype(float).copy()
-                perc = (len(np.unique(tmpvalues)) / len(tmpvalues))
+                perc=0
+                if len(tmpvalues)>0:
+                    perc = (len(np.unique(tmpvalues)) / len(tmpvalues))
                 if (perc>=perc_min_num):
                     dtypes[i]='num'
                     logstr = ('[force]')
