@@ -79,14 +79,15 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
     # Make empty frames
     out_numeric=pd.DataFrame()
     out_onehot=pd.DataFrame()
+    max_str_len = np.max(list(map(len, df.columns.values.astype(str).tolist())))+2
 
     # Run over all columns
     for i in np.arange(0,df.shape[1]):
-        if verbose>=3: print('[DF2ONEHOT] Working on %s' %(df.columns[i]), end='')
-
+        makespaces = ''.join(['.'] * (max_str_len - len(df.columns[i])))
         # Do not touch a float
         if 'float' in str(df.dtypes[i]):
-            if verbose>=3: print('')
+            # if verbose>=3: print('[df2onehot] >Working on %s' %(df.columns[i]))
+            if verbose>=3: print('[df2onehot] >Working on %s%s[float]' %(df.columns[i], makespaces))
             out_numeric[df.columns[i]] = df.iloc[:,i]
             if hot_only is False:
                 out_onehot[df.columns[i]] = df.iloc[:,i]
@@ -94,10 +95,9 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
         else:
             integer_encoded = label_encoder.fit_transform(df.iloc[:,i])
             # integer_encoded = set_y(integer_encoded, y_min=y_min, numeric=True, verbose=0)
-
             out_numeric[df.columns[i]] = integer_encoded
             out_numeric[df.columns[i]] = out_numeric[df.columns[i]].astype('category')
-            if verbose>=3: print('.....[%.0f]' %(len(np.unique(integer_encoded))))
+            if verbose>=3: print('[df2onehot] >Working on %s%s[%.0f]' %(df.columns[i], makespaces, len(np.unique(integer_encoded)) ))
 
             # Contains a single value
             if len(np.unique(integer_encoded))<=1:
@@ -125,7 +125,7 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
                     out_numeric[df.columns[i]] = (onehot_encoded * np.arange(1,onehot_encoded.shape[1] + 1)).sum(axis=1)
 
     [uiy, ycounts] = np.unique(labx, return_counts=True)
-    if verbose >=3: print('[DF2ONEHOT] Total onehot features: %.0d' %(np.sum(ycounts)))
+    if verbose >=3: print('[df2onehot] >\n[df2onehot] >Total onehot features: %.0d' %(np.sum(ycounts)))
     # idx = np.argsort(ycounts)[::-1]
     # print(np.c_[uiy[idx], ycounts[idx]])
 
@@ -158,7 +158,7 @@ def _expand_column_with_list(df, dtypes, verbose=3):
 
         # Expand columns with lists
         for i in range(0,len(idxCol)):
-            if verbose>=3: print('[DF2ONEHOT] Column is detected as list and expanded: [%s]' %(df.columns[idxCol[i]]))
+            if verbose>=3: print('[df2onehot] >Column is detected as list and expanded: [%s]' %(df.columns[idxCol[i]]))
             uielements = np.unique(sum(df.iloc[:,idxCol[i]].to_list(),[]))
             dftmp = df.iloc[:,idxCol[i]].apply(_findcol, cols=uielements)
             arr = np.concatenate(dftmp).reshape((dftmp.shape[0],dftmp[0].shape[0]))
@@ -203,13 +203,13 @@ def import_example(getfile='titanic'):
     if getfile=='titanic':
         getfile='titanic_train.zip'
 
-    print('[DF2ONEHOT] Loading %s..' %getfile)
+    print('[df2onehot] >Loading %s..' %getfile)
     curpath = os.path.dirname(os.path.abspath(__file__))
     PATH_TO_DATA=os.path.join(curpath, 'data', getfile)
     if os.path.isfile(PATH_TO_DATA):
         df=pd.read_csv(PATH_TO_DATA, sep=',')
         return df
     else:
-        print('[DF2ONEHOT] Oops! Example data not found!')
+        print('[df2onehot] >Oops! Example data not found!')
         return None
 

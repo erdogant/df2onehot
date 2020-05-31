@@ -58,8 +58,8 @@ def set_dtypes(df, dtypes='pandas', is_list=False, perc_min_num=None, num_if_dec
 # %% Setup columns in correct dtypes
 def _auto_dtypes(df, dtypes, is_list=False, perc_min_num=None, num_if_decimal=True, verbose=3):
     if isinstance(dtypes, str):
-        if verbose>=3: print('[DTYPES] Auto detecting dtypes')
-        max_str_len=np.max(list(map(len, df.columns.values.astype(str).tolist())))
+        if verbose>=3: print('[df2onehot] >Auto detecting dtypes')
+        max_str_len = np.max(list(map(len, df.columns.values.astype(str).tolist())))
         dtypes = [''] * df.shape[1]
         logstr = '   '
 
@@ -115,7 +115,7 @@ def _auto_dtypes(df, dtypes, is_list=False, perc_min_num=None, num_if_decimal=Tr
             #         logstr=' > [exclude]: all elements are unique'
 
             makespaces = ''.join([' '] * (max_str_len - len(df.columns[i])))
-            if verbose>=2: print('[DTYPES] [%s]%s > %s->[%s] [%.0d]' %(df.columns[i], makespaces, logstr, dtypes[i], len(df.iloc[:,i].dropna().unique())))
+            if verbose>=2: print('[df2onehot] >[%s]%s > %s > [%s] [%.0d]' %(df.columns[i], makespaces, logstr, dtypes[i], len(df.iloc[:,i].dropna().unique())))
 
     # assert len(dtypes)==df.shape[1], 'Length of dtypes and dataframe columns does not match'
     return(dtypes)
@@ -125,10 +125,10 @@ def _auto_dtypes(df, dtypes, is_list=False, perc_min_num=None, num_if_decimal=Tr
 def _set_types(df, dtypes, verbose=3):
     assert len(dtypes)==df.shape[1], 'Number of dtypes and columns in df does not match'
 
-    if verbose>=3: print('[DTYPES] Setting dtypes in dataframe')
+    if verbose>=3: print('[df2onehot] >\n[df2onehot] >Setting dtypes in dataframe')
     # remcols=[]
     for col,dtype in zip(df.columns, dtypes):
-        if verbose>=4: print('[DTYPES] %s' %(col))
+        if verbose>=4: print('[df2onehot] >%s' %(col))
         if dtype=='num':
             df[col]=df[col].astype(float)
         elif dtype=='cat':
@@ -136,7 +136,7 @@ def _set_types(df, dtypes, verbose=3):
             df[col] = df[col].astype(str)
             # df[col] = df[col].astype('category')
         else:
-            if verbose>=2: print('[DTYPES] [%s] [list] is used in dtyping!' %(col))
+            if verbose>=2: print('[df2onehot] >[%s] [list] is used in dtyping!' %(col))
             # df[col].loc[df[col].isna()]=None
             # df[col] = df[col].astype(str)
 
@@ -167,7 +167,7 @@ def set_y(y, y_min=None, numeric=False, verbose=3):
     y = y.astype(str)
 
     if not isinstance(y_min, type(None)):
-        if verbose>=3: print('[DTYPES] Group [y] labels that contains less then %d occurences are grouped under one single name [_other_]' %(y_min))
+        if verbose>=3: print('[df2onehot] >Group [y] labels that contains less then %d occurences are grouped under one single name [_other_]' %(y_min))
         [uiy, ycounts] = np.unique(y, return_counts=True)
         labx = uiy[ycounts<y_min]
         y = y.astype('O')
