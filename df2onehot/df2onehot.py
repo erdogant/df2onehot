@@ -146,30 +146,36 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
 
 
 # %%
+# %%
 def _expand_column_with_list(df, dtypes, verbose=3):
     # Check for any lists in dtypes
-    Icol=np.isin(dtypes,'list')
+    Icol = np.isin(dtypes,'list')
 
     # If any
     if np.any(Icol):
         # Empty df
-        df_list_to_onehot=pd.DataFrame()
-        idxCol=np.where(Icol)[0]
+        df_list_to_onehot = pd.DataFrame()
+        idxCol = np.where(Icol)[0]
 
         # Expand columns with lists
         for i in range(0,len(idxCol)):
             if verbose>=3: print('[df2onehot] >Column is detected as list and expanded: [%s]' %(df.columns[idxCol[i]]))
-            uielements = np.unique(sum(df.iloc[:,idxCol[i]].to_list(),[]))
+            # Gather only the not NaN rows
+            Inan = df.iloc[:,idxCol[i]].isna()
+            dftmp = df.iloc[~Inan.values,idxCol[i]].copy()
+            uielements = np.unique(sum(dftmp.to_list(),[]))
+
+            # uielements = np.unique(sum(df.iloc[:,idxCol[i]].to_list(),[]))
             dftmp = df.iloc[:,idxCol[i]].apply(_findcol, cols=uielements)
             arr = np.concatenate(dftmp).reshape((dftmp.shape[0],dftmp[0].shape[0]))
             df1 = pd.DataFrame(index=np.arange(0,df.shape[0]), columns=uielements, data=arr, dtype='bool')
 
             # Combine in one big matrix
-            df_list_to_onehot=pd.concat([df_list_to_onehot.astype(bool),df1], axis=1)
+            df_list_to_onehot=pd.concat([df_list_to_onehot.astype(bool), df1], axis=1)
         # Drop columns that are expanded
-        df.drop(labels=df.columns[Icol].values, axis=1, inplace=True)
+        df.drop(labels = df.columns[Icol].values, axis=1, inplace=True)
         # Combine new one-hot-colums
-        df=pd.concat([df,df_list_to_onehot], axis=1)
+        df = pd.concat([df,df_list_to_onehot], axis=1)
 
     # Redo the typing
     [df, dtypes] = set_dtypes(df, verbose=0)

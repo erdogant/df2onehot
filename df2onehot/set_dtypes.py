@@ -115,7 +115,10 @@ def _auto_dtypes(df, dtypes, is_list=False, perc_min_num=None, num_if_decimal=Tr
             #         logstr=' > [exclude]: all elements are unique'
 
             makespaces = ''.join([' '] * (max_str_len - len(df.columns[i])))
-            if verbose>=2: print('[df2onehot] >[%s]%s > %s > [%s] [%.0d]' %(df.columns[i], makespaces, logstr, dtypes[i], len(df.iloc[:,i].dropna().unique())))
+            try:
+                if verbose>=2: print('[df2onehot] >[%s]%s > %s > [%s] [%.0d]' %(df.columns[i], makespaces, logstr, dtypes[i], len(df.iloc[:,i].dropna().unique())))
+            except:
+                if verbose>=2: print('[df2onehot] >[%s]%s > %s > [%s] [%.0d]' %(df.columns[i], makespaces, logstr, dtypes[i], len(df.iloc[:,i].dropna())))
 
     # assert len(dtypes)==df.shape[1], 'Length of dtypes and dataframe columns does not match'
     return(dtypes)
