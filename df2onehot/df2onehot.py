@@ -94,6 +94,8 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
                 labx.append(df.columns[i])
         else:
             integer_encoded = label_encoder.fit_transform(df.iloc[:,i])
+            # If all values are the same, the encoder will return 0 (=False). We set values at 1 (by +1) and make them True. Otherwise it can be mis interpreted the the value was not present in the datset.
+            if np.all(np.unique(integer_encoded)==0): integer_encoded=integer_encoded+1
             # integer_encoded = set_y(integer_encoded, y_min=y_min, numeric=True, verbose=0)
             out_numeric[df.columns[i]] = integer_encoded
             out_numeric[df.columns[i]] = out_numeric[df.columns[i]].astype('category')
