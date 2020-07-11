@@ -4,14 +4,14 @@ from df2onehot.df2onehot import (
     )
 
 from df2onehot.set_dtypes import (
-	set_dtypes,
-	is_DataFrame,
+ 	set_dtypes,
+ 	is_DataFrame,
     set_y,
 )
 
 __author__ = 'Erdogan Tasksen'
 __email__ = 'erdogant@gmail.com'
-__version__ = '0.1.5'
+__version__ = '0.1.6'
 
 # module level doc-string
 __doc__ = """

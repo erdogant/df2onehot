@@ -74,11 +74,18 @@ def _auto_dtypes(df, dtypes, is_list=False, perc_min_num=None, num_if_decimal=Tr
             elif 'str' in str(df.dtypes[i]):
                 dtypes[i]='cat'
                 logstr = ('[str]  ')
-            elif 'object' in str(df.dtypes[i]):
-                # Check whether this is a list
+            elif ('object' in str(df.dtypes[i])) and not is_list:
+                dtypes[i]='cat'
                 logstr = ('[obj]  ')
-                if is_list:
-                    dtypes[i]='list' if isinstance(list(), type(df.iloc[:,i][0])) else 'cat'
+            elif 'object' in str(df.dtypes[i]) and is_list:
+                # Check whether this is a list or array
+                logstr = ('[obj]  ')
+                tmpdf = df.iloc[:,i]
+                tmpdf = tmpdf.loc[~tmpdf.isna()].values[0]
+                if isinstance(list(), type(tmpdf)):
+                    dtypes[i]='list'
+                elif 'numpy.ndarray' in str(type(tmpdf)):
+                    dtypes[i]='list'
                 else:
                     dtypes[i]='cat'
             elif 'bool' in str(df.dtypes[i]):

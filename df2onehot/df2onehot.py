@@ -164,10 +164,16 @@ def _expand_column_with_list(df, dtypes, verbose=3):
             if verbose>=3: print('[df2onehot] >Column is detected as list and expanded: [%s]' %(df.columns[idxCol[i]]))
             # Gather only the not NaN rows
             Inan = df.iloc[:,idxCol[i]].isna()
-            dftmp = df.iloc[~Inan.values,idxCol[i]].copy()
-            uielements = np.unique(sum(dftmp.to_list(),[]))
+            # Grap only unique elements from the combined set of lists
+            dftmp = df.iloc[~Inan.values, idxCol[i]].copy()
 
-            # uielements = np.unique(sum(df.iloc[:,idxCol[i]].to_list(),[]))
+            # Make str, float and int elements of type list
+            typing = list(map(type, dftmp.values))
+            I = np.logical_or(list(map(lambda x: isinstance(str(), x), typing)), np.logical_or(list(map(lambda x: isinstance(float(), x), typing)), list(map(lambda x: isinstance(int(), x), typing))))
+            dftmp.loc[I] = list(map(lambda x: [x], dftmp.loc[I]))
+            uielements = np.unique(sum(list(map(lambda x: list(x) , dftmp)), []))
+
+            # uielements = np.unique(sum(df.iloc[:,idxCol[i]].to_list(), []))
             dftmp = df.iloc[:,idxCol[i]].apply(_findcol, cols=uielements)
             arr = np.concatenate(dftmp).reshape((dftmp.shape[0],dftmp[0].shape[0]))
             df1 = pd.DataFrame(index=np.arange(0,df.shape[0]), columns=uielements, data=arr, dtype='bool')
