@@ -126,7 +126,7 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
                 if onehot_encoded.shape[1]>2:
                     out_numeric[df.columns[i]] = (onehot_encoded * np.arange(1,onehot_encoded.shape[1] + 1)).sum(axis=1)
 
-    [uiy, ycounts] = np.unique(labx, return_counts=True)
+    uiy, ycounts = np.unique(labx, return_counts=True)
     if verbose >=3: print('[df2onehot] >\n[df2onehot] >Total onehot features: %.0d' %(np.sum(ycounts)))
     # idx = np.argsort(ycounts)[::-1]
     # print(np.c_[uiy[idx], ycounts[idx]])
