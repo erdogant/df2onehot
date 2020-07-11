@@ -1,21 +1,27 @@
 # %%
-# import numpy as np
-# import df2onehot
-# df = df2onehot.import_example()
-# colnames = np.array(['3','4','5','6','7','8','9','11'])
-# df['lists'] = np.nan
-# df['lists'].iloc[0] = ['3','4']
-# df['lists'].iloc[2] = ['5','6','7','8']
-# df['lists'].iloc[888] = ['9','11','4']
-# df['lists'].iloc[889] = 10
-# df['lists'].iloc[890] = 1
+import numpy as np
+import df2onehot
+df = df2onehot.import_example()
+colnames = np.array(['3','4','5','6','7','8','9','11','10','1'])
+df['lists'] = np.nan
+df['lists'].iloc[0] = ['3',4]
+df['lists'].iloc[2] = ['5','6','7','8']
+df['lists'].iloc[888] = ['9','11','4']
+df['lists'].iloc[889] = 10
+df['lists'].iloc[890] = 1
 
-# # Run df2onehot
-# out = df2onehot.df2onehot(df)
+df['list2'] = np.nan
+df['list2'].iloc[0] = ['4','45']
+df['list2'].iloc[890] = 1
+df['list2'].iloc[888] = 10
+
+# Run df2onehot
+out = df2onehot.df2onehot(df)
 
 # # TEST 1: check output is unchanged
 # out = df2onehot(df)
 # out['onehot']
+out['numeric'][colnames]
 
 # %%
 import numpy as np

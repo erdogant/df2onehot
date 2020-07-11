@@ -72,17 +72,17 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
     # Reset index
     df.reset_index(drop=True, inplace=True)
     # Determine Dtypes
-    [df, dtypes] = set_dtypes(df, args['dtypes'], is_list=args['list_expand'], perc_min_num=args['perc_min_num'], verbose=args['verbose'])
+    df, dtypes = set_dtypes(df, args['dtypes'], is_list=args['list_expand'], perc_min_num=args['perc_min_num'], verbose=args['verbose'])
     # If any column is a list, also expand the list!
-    [df, dtypes] = _expand_column_with_list(df, dtypes, args['verbose'])
+    df, dtypes = _expand_column_with_list(df, dtypes, args['verbose'])
 
     # Make empty frames
-    out_numeric=pd.DataFrame()
-    out_onehot=pd.DataFrame()
+    out_numeric = pd.DataFrame()
+    out_onehot = pd.DataFrame()
     max_str_len = np.max(list(map(len, df.columns.values.astype(str).tolist())))+2
 
     # Run over all columns
-    for i in np.arange(0,df.shape[1]):
+    for i in np.arange(0, df.shape[1]):
         makespaces = ''.join(['.'] * (max_str_len - len(df.columns[i])))
         # Do not touch a float
         if 'float' in str(df.dtypes[i]):
@@ -148,7 +148,6 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
 
 
 # %%
-# %%
 def _expand_column_with_list(df, dtypes, verbose=3):
     # Check for any lists in dtypes
     Icol = np.isin(dtypes,'list')
@@ -156,12 +155,12 @@ def _expand_column_with_list(df, dtypes, verbose=3):
     # If any
     if np.any(Icol):
         # Empty df
-        df_list_to_onehot = pd.DataFrame()
+        df2 = pd.DataFrame()
         idxCol = np.where(Icol)[0]
 
         # Expand columns with lists
         for i in range(0,len(idxCol)):
-            if verbose>=3: print('[df2onehot] >Column is detected as list and expanded: [%s]' %(df.columns[idxCol[i]]))
+            if verbose>=3: print('[df2onehot] >Array-like column is detected: [%s]' %(df.columns[idxCol[i]]))
             # Gather only the not NaN rows
             Inan = df.iloc[:,idxCol[i]].isna()
             # Grap only unique elements from the combined set of lists
@@ -169,31 +168,52 @@ def _expand_column_with_list(df, dtypes, verbose=3):
 
             # Make str, float and int elements of type list
             typing = list(map(type, dftmp.values))
-            I = np.logical_or(list(map(lambda x: isinstance(str(), x), typing)), np.logical_or(list(map(lambda x: isinstance(float(), x), typing)), list(map(lambda x: isinstance(int(), x), typing))))
-            dftmp.loc[I] = list(map(lambda x: [x], dftmp.loc[I]))
-            uielements = np.unique(sum(list(map(lambda x: list(x) , dftmp)), []))
+            Iloc = np.logical_or(list(map(lambda x: isinstance(str(), x), typing)), np.logical_or(list(map(lambda x: isinstance(float(), x), typing)), list(map(lambda x: isinstance(int(), x), typing))))
+            if np.any(Iloc):
+                # Convert to string! This is required because the colnames also converts all to string.
+                dftmp.loc[Iloc] = list(map(lambda x: [str(x)], dftmp.loc[Iloc]))
+                df.iloc[dftmp.loc[Iloc].index,idxCol[i]] = dftmp.loc[Iloc]
 
-            # uielements = np.unique(sum(df.iloc[:,idxCol[i]].to_list(), []))
-            dftmp = df.iloc[:,idxCol[i]].apply(_findcol, cols=uielements)
-            arr = np.concatenate(dftmp).reshape((dftmp.shape[0],dftmp[0].shape[0]))
-            df1 = pd.DataFrame(index=np.arange(0,df.shape[0]), columns=uielements, data=arr, dtype='bool')
-
+            # Get all unique elements
+            listvector = list(map(lambda x: list(x) , dftmp))
+            listvector = sum(listvector, [])
+            # All elements are converted to string!
+            colnames = np.unique(listvector)
+            # Lookup colname in the vector and make array
+            dftmp = df.iloc[:,idxCol[i]].apply(_findcol, cols=colnames)
+            arr = np.concatenate(dftmp).reshape((dftmp.shape[0], dftmp[0].shape[0]))
+            df1 = pd.DataFrame(index=np.arange(0,df.shape[0]), columns=colnames, data=arr, dtype='bool')
             # Combine in one big matrix
-            df_list_to_onehot=pd.concat([df_list_to_onehot.astype(bool), df1], axis=1)
+            if df2.empty:
+                df2 = df1.copy()
+                # df2 = pd.concat([df2.astype(bool), df1], axis=1)
+            else:
+                for colname in df1.columns:
+                    if np.any(np.isin(colname, df2.columns.values)):
+                        df2[colname] = np.logical_or(df2[colname], df1[colname])
+                    else:
+                        df2[colname] = df1[colname].copy()
+
+            # pd.merge(df_list_to_onehot, df1, on=df_list_to_onehot.columns.values).sum(axis=1)
+            # pd.merge(df_list_to_onehot, df1, how='inner')
+            # totlist = list(df_list_to_onehot.columns.values)+list(df1.columns.values)
+            # pd.concat([df_list_to_onehot, df1]).groupby(totlist).sum().reset_index()
+            # pd.merge(df_list_to_onehot, df1, on=totlist).sum(axis=1)
+            
         # Drop columns that are expanded
         df.drop(labels = df.columns[Icol].values, axis=1, inplace=True)
         # Combine new one-hot-colums
-        df = pd.concat([df,df_list_to_onehot], axis=1)
+        df = pd.concat([df, df2], axis=1)
 
     # Redo the typing
-    [df, dtypes] = set_dtypes(df, verbose=0)
+    df, dtypes = set_dtypes(df, verbose=0)
     # Return
     return(df, dtypes)
 
 
 # %% Find columns
 def _findcol(x, cols):
-    return(np.isin(cols,x))
+    return(np.isin(cols, x))
 
 
 # %% Example data
