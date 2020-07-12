@@ -25,7 +25,7 @@ def set_dtypes(df, dtypes='pandas', is_list=False, perc_min_num=None, num_if_dec
     dtypes : list of str or 'pandas', optional
         Representation of the columns in the form of ['cat','num']. By default the dtype is determiend based on the pandas dataframe.
     is_list : bool [False, True], optional
-        If a element in an array contains a list, it is converted to a string and treated as catagorical ['cat']. The default is False.
+        If an element in a vector contains a list/array/dict, it is converted to a string and treated as catagorical ['cat']. The default is False.
     perc_min_num : float [None, 0..1], optional
         Force column (int or float) to be numerical if unique non-zero values are above percentage. The default is None. Alternative can be 0.8
     num_if_decimal : bool [False, True], optional
@@ -86,10 +86,12 @@ def _auto_dtypes(df, dtypes, is_list=False, perc_min_num=None, num_if_decimal=Tr
                     dtypes[i]='list'
                 elif 'numpy.ndarray' in str(type(tmpdf)):
                     dtypes[i]='list'
+                elif isinstance(dict(), type(tmpdf)):
+                    dtypes[i]='dict'
                 else:
                     dtypes[i]='cat'
             elif 'bool' in str(df.dtypes[i]):
-                dtypes[i]='cat'
+                dtypes[i]='bool'
                 logstr = ('[bool]  ')
             else:
                 dtypes[i]='cat'
@@ -145,6 +147,9 @@ def _set_types(df, dtypes, verbose=3):
             df[col].loc[df[col].isna().values]=None
             df[col] = df[col].astype(str)
             # df[col] = df[col].astype('category')
+        elif dtype=='bool':
+            df[col].loc[df[col].isna().values]=None
+            df[col] = df[col].astype(bool)
         else:
             if verbose>=2: print('[df2onehot] >[%s] [list] is used in dtyping!' %(col))
             # df[col].loc[df[col].isna()]=None
