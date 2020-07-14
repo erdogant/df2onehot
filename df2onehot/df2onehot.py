@@ -20,7 +20,7 @@ onehot_encoder = OneHotEncoder(sparse=False, categories='auto')
 
 
 # %% Dataframe to one-hot
-def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True, list_expand=True, excl_background=None, verbose=3):
+def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True, deep_extract=True, excl_background=None, verbose=3):
     """Convert dataframe to one-hot matrix.
 
     Parameters
@@ -35,8 +35,9 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
         Force column (int or float) to be numerical if unique non-zero values are above percentage. The default is None. Alternative can be 0.8
     hot_only : bool [True, False], optional
         When True; the output of the onehot matrix exclusively contains categorical values that are transformed to one-hot. The default is True.
-    list_expand : bool [True, False], optional
-        Expanding of columns that contain lists of strings.. The default is True.
+    deep_extract : bool [False, True] (default : False)
+        True: Extract information from a vector that contains a list/array/dict.
+        False: converted to a string and treated as catagorical ['cat'].
     excl_background : list or None, [0], [0, '0.0', 'male', ...], optional
         Remove values/strings that labeled as background. As an example, in a two-class approach with [0,1], the 0 is usually the background and not of interest. The default is None.
     verbose : int, optional
@@ -66,18 +67,17 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
     args['dtypes'] = dtypes
     args['verbose'] = verbose
     args['perc_min_num'] = perc_min_num
-    args['deep_extract'] = list_expand
+    args['deep_extract'] = deep_extract
     args['excl_background'] = excl_background
     labx = []
 
     # Reset index
     df.reset_index(drop=True, inplace=True)
-    # Remove non-ascii chars
-    # df = _remove_non_ascii(df)
     # Determine Dtypes
-    df, dtypes = set_dtypes(df, args['dtypes'], is_list=args['deep_extract'], perc_min_num=args['perc_min_num'], verbose=args['verbose'])
+    df, dtypes = set_dtypes(df, args['dtypes'], deep_extract=args['deep_extract'], perc_min_num=args['perc_min_num'], verbose=args['verbose'])
     # If any column is a list, also expand the list!
-    df, dtypes = _deep_extract(df, dtypes, perc_min_num=args['perc_min_num'], verbose=args['verbose'])
+    if args['deep_extract']:
+        df, dtypes = _deep_extract(df, dtypes, perc_min_num=args['perc_min_num'], verbose=args['verbose'])
 
     # Make empty frames
     out_numeric = pd.DataFrame()
@@ -302,7 +302,7 @@ def _deep_extract(df, dtypes, perc_min_num=None, verbose=3):
         # Remove repetative column names
         dftot = _make_columns_unique(dftot, verbose=verbose)
         # Set dtypes
-        dftot, dtypest = set_dtypes(dftot, perc_min_num=perc_min_num, verbose=3)
+        dftot, dtypest = set_dtypes(dftot, perc_min_num=perc_min_num, deep_extract=False, verbose=3)
         # Combine into dataframe
         df = pd.concat([df, dftot], axis=1)
         dtypes = dtypes + dtypest

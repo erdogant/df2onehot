@@ -15,7 +15,7 @@ label_encoder = LabelEncoder()
 
 
 # %% Set dtypes
-def set_dtypes(df, dtypes='pandas', is_list=False, perc_min_num=None, num_if_decimal=True, verbose=3):
+def set_dtypes(df, dtypes='pandas', deep_extract=False, perc_min_num=None, num_if_decimal=True, verbose=3):
     """Set the dtypes of the dataframe.
 
     Parameters
@@ -24,8 +24,9 @@ def set_dtypes(df, dtypes='pandas', is_list=False, perc_min_num=None, num_if_dec
         Input dataframe for which the rows are the features, and colums are the samples.
     dtypes : list of str or 'pandas', optional
         Representation of the columns in the form of ['cat','num']. By default the dtype is determiend based on the pandas dataframe.
-    is_list : bool [False, True], optional
-        If an element in a vector contains a list/array/dict, it is converted to a string and treated as catagorical ['cat']. The default is False.
+    deep_extract : bool [False, True] (default : False)
+        True: Extract information from a vector that contains a list/array/dict.
+        False: converted to a string and treated as catagorical ['cat'].
     perc_min_num : float [None, 0..1], optional
         Force column (int or float) to be numerical if unique non-zero values are above percentage. The default is None. Alternative can be 0.8
     num_if_decimal : bool [False, True], optional
@@ -42,13 +43,13 @@ def set_dtypes(df, dtypes='pandas', is_list=False, perc_min_num=None, num_if_dec
     """
     config = {}
     config['dtypes'] = dtypes
-    config['is_list'] = is_list
+    config['deep_extract'] = deep_extract
     config['perc_min_num'] = perc_min_num
     config['num_if_decimal'] = num_if_decimal
     config['verbose'] = verbose
 
     # Determine dtypes for columns
-    config['dtypes'] = _auto_dtypes(df, config['dtypes'], is_list=config['is_list'], perc_min_num=config['perc_min_num'], num_if_decimal=config['num_if_decimal'], verbose=config['verbose'])
+    config['dtypes'] = _auto_dtypes(df, config['dtypes'], deep_extract=config['deep_extract'], perc_min_num=config['perc_min_num'], num_if_decimal=config['num_if_decimal'], verbose=config['verbose'])
     # Setup dtypes in columns
     df = _set_types(df.copy(), config['dtypes'], verbose=config['verbose'])
     # return
@@ -56,7 +57,7 @@ def set_dtypes(df, dtypes='pandas', is_list=False, perc_min_num=None, num_if_dec
 
 
 # %% Setup columns in correct dtypes
-def _auto_dtypes(df, dtypes, is_list=False, perc_min_num=None, num_if_decimal=True, verbose=3):
+def _auto_dtypes(df, dtypes, deep_extract=False, perc_min_num=None, num_if_decimal=True, verbose=3):
     if isinstance(dtypes, str):
         if verbose>=3: print('[df2onehot] >Auto detecting dtypes')
         max_str_len = np.max(list(map(len, df.columns.values.astype(str).tolist())))
@@ -74,10 +75,10 @@ def _auto_dtypes(df, dtypes, is_list=False, perc_min_num=None, num_if_decimal=Tr
             elif 'str' in str(df.dtypes[i]):
                 dtypes[i]='cat'
                 logstr = ('[str]  ')
-            elif ('object' in str(df.dtypes[i])) and not is_list:
+            elif ('object' in str(df.dtypes[i])) and not deep_extract:
                 dtypes[i]='cat'
                 logstr = ('[obj]  ')
-            elif 'object' in str(df.dtypes[i]) and is_list:
+            elif 'object' in str(df.dtypes[i]) and deep_extract:
                 # Check whether this is a list or array
                 logstr = ('[obj]  ')
                 tmpdf = df.iloc[:, i]
@@ -115,16 +116,9 @@ def _auto_dtypes(df, dtypes, is_list=False, perc_min_num=None, num_if_decimal=Tr
                     dtypes[i] = 'num'
                     logstr = ('[force]')
 
+            # Remove the non-ascii chars from categorical values
             if dtypes[i]=='cat':
                 df.iloc[:,i] = _remove_non_ascii(df.iloc[:,i])
-
-            # Force to exclude if categorical has only unique values
-            # if dtypes[i]=='cat':
-            #     tmpvalues=df.iloc[:,i].dropna().copy()
-            #     perc=(len(np.unique(tmpvalues))/len(tmpvalues))
-            #     if (perc>=1):
-            #         dtypes[i]=''
-            #         logstr=' > [exclude]: all elements are unique'
 
             makespaces = ''.join([' '] * (max_str_len - len(df.columns[i])))
             try:
