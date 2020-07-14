@@ -13,7 +13,7 @@ else:
 with open("README.md", "r") as fh:
     long_description = fh.read()
 setuptools.setup(
-     install_requires=['sklearn','numpy','pandas'],
+     install_requires=['sklearn','numpy','pandas','wget'],
      python_requires='>=3',
      name='df2onehot',
      version=new_version,
