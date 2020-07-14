@@ -239,18 +239,26 @@ def dict2df(dfc):
 
 # %%
 def _deep_extract(df, dtypes, perc_min_num=None, verbose=3):
-    # Check for any lists in dtypes
-    Ilist = np.isin(dtypes,'list')
+    # Extract dict
+    dftot1, idxrem1 = _extract_dict(df, dtypes, verbose=verbose)
+    # Extract lists
+    dftot2, idxrem2 = _extract_list(df, dtypes, verbose=verbose)
+    # Combine the extracts
+    df, dtypes = _extract_combine(df, dtypes, dftot1, dftot2, idxrem1, idxrem2, perc_min_num, verbose=verbose)
+
+    # Return
+    if df.shape[1]!=len(dtypes): raise Exception('[df2onehot] >Error: size of dtypes and dataframe does not match.')
+    return(df, dtypes)
+
+# %%
+def _extract_dict(df, dtypes, verbose=3):
+    dfout = pd.DataFrame()
+    idxrem = []
     Idict = np.isin(dtypes,'dict')
-    dftot1 = pd.DataFrame()
-    dftot2 = pd.DataFrame()
-    idxrem1 = []
-    idxrem2 = []
-
-
+    
     # Expand dict
     if np.any(Idict):
-        if verbose >=3: print('[df2onehot] >\n[df2onehot] >Starting deep extraction..')
+        if verbose >=3: print('[df2onehot] >\n[df2onehot] >Deep extraction..')
         idxCol = np.where(Idict)[0]
         max_str_len = np.max(list(map(len, df.columns[idxCol].values.astype(str).tolist())))
         # Expand every columns that contains dict
@@ -265,12 +273,18 @@ def _deep_extract(df, dtypes, perc_min_num=None, verbose=3):
                 # dfc = df.iloc[:,idx].astype(str)
                 # dfc = dfc.apply(_remove_non_ascii)
 
-            # Remove non ascii chars
-            # dfc = _remove_non_ascii(dfc)
             # Combine extracted columns into big dataframe
-            dftot1 = pd.concat([dftot1, dfc], axis=1)
+            dfout = pd.concat([dfout, dfc], axis=1)
             # Add idx to remove
-            idxrem1.append(idx)
+            idxrem.append(idx)
+    
+    return dfout, idxrem
+
+# %%
+def _extract_list(df, dtypes, verbose=3):
+    Ilist = np.isin(dtypes,'list')
+    dfout = pd.DataFrame()
+    idxrem = []
 
     # Expand list
     if np.any(Ilist):
@@ -284,11 +298,15 @@ def _deep_extract(df, dtypes, perc_min_num=None, verbose=3):
             # Convert column into onehot
             dfc = _array2df(df, uifeat, idx)
             # Combine hot-dataframes into one big dataframe
-            dftot2 = _concat(dftot2, dfc)
+            dfout = _concat(dfout, dfc)
             # Add idx to remove
-            idxrem2.append(idx)
+            idxrem.append(idx)
             if verbose>=3: print('[df2onehot] >[%s]%s >deep extract > [%s]  [%d]' %(df.columns[idx], makespaces, dtypes[idx], dfc.shape[1]))
+    
+    return dfout, idxrem
 
+# %%
+def _extract_combine(df, dtypes, dftot1, dftot2, idxrem1, idxrem2, perc_min_num, verbose=3):
     # Drop columns that are expanded
     idxrem = idxrem1+idxrem2
     if len(idxrem)>0:
@@ -302,22 +320,23 @@ def _deep_extract(df, dtypes, perc_min_num=None, verbose=3):
         # Remove repetative column names
         dftot = _make_columns_unique(dftot, verbose=verbose)
         # Set dtypes
-        dftot, dtypest = set_dtypes(dftot, perc_min_num=perc_min_num, deep_extract=False, verbose=3)
+        dftot, dtypest = set_dtypes(dftot, perc_min_num=perc_min_num, deep_extract=True, verbose=3)
         # Combine into dataframe
         df = pd.concat([df, dftot], axis=1)
         dtypes = dtypes + dtypest
         if verbose>=3: print('[df2onehot] >[%d] additional columns extracted by deep extract.' %(dftot1.shape[1]+dftot2.shape[1]))
-
-    # Return
-    if df.shape[1]!=len(dtypes): raise Exception('[df2onehot] >Error: size of dtypes and dataframe does not match.')
-    return(df, dtypes)
-
+    return df, dtypes
 
 # %% Remove repetative column
 def _make_columns_unique(dftot, verbose=3):
     columns = dftot.columns.value_counts()
     columns = columns[columns.values>1].index.values
     if verbose>=3: print('[df2onehot] >[%d] repetative columns detected and a single one is taken: %s' %(len(columns), columns))
+
+    # for column in columns:
+    #     dfc = dftot[column]
+    #     dfmerged = dfc.stack().groupby(level=0).apply(lambda x: x.unique().tolist())
+
     _, uiidx = np.unique(dftot.columns, return_index=True)
     dftot = dftot.iloc[:,np.sort(uiidx)]
     return dftot
