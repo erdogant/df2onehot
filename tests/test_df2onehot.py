@@ -15,6 +15,8 @@ def test_df2onehot():
     assert np.all(ycounts==np.array([148,   4, 891,   7, 891,   3,   2,   7,   2, 681, 1]))
     # TEST WHETHER SIMILAR VALUES ARE SET TO TRUE
     assert out['onehot']['all_true'].sum()==df.shape[0]
+    # TEST WHETHER SIZE MATCHES
+    assert out['numeric'].shape[1]==len(out['dtypes'])
 
     df = import_example()
 

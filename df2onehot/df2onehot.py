@@ -259,7 +259,7 @@ def _deep_extract(df, dtypes, perc_min_num=None, verbose=3):
             try:
                 dfc, idxempty = dict2df(df.iloc[:, idx])
                 # dfc = pd.DataFrame.from_records(df.iloc[:,idx])
-                if verbose>=3: print('[df2onehot] >[%s]%s >deep extract > [%s] [%d]' %(df.columns[idx], makespaces, dtypes[idx], dfc.shape[1]))
+                if verbose>=3: print('[df2onehot] >[%s]%s >deep extract > [%s]  [%d]' %(df.columns[idx], makespaces, dtypes[idx], dfc.shape[1]))
             except:
                 if verbose>=3: print('[df2onehot] >[%s]%s >deep extract > [failed]' %(df.columns[idx], makespaces))
                 # dfc = df.iloc[:,idx].astype(str)
@@ -279,8 +279,6 @@ def _deep_extract(df, dtypes, perc_min_num=None, verbose=3):
         # Expand every columns that contains either list
         for idx in idxCol:
             makespaces = ''.join([' '] * (max_str_len - len(df.columns[idx])))
-            # if verbose>=3: print('[df2onehot] >%s column is detected: [%s]' %(dtypes[idx], df.columns[idx]))
-            if verbose>=3: print('[df2onehot] >[%s]%s >deep extract >[%s]' %(df.columns[idx], makespaces, dtypes[idx]))
             # Convert str/float/int to type
             df, uifeat = _col2type(df, dtypes, idx)
             # Convert column into onehot
@@ -289,13 +287,14 @@ def _deep_extract(df, dtypes, perc_min_num=None, verbose=3):
             dftot2 = _concat(dftot2, dfc)
             # Add idx to remove
             idxrem2.append(idx)
+            if verbose>=3: print('[df2onehot] >[%s]%s >deep extract > [%s]  [%d]' %(df.columns[idx], makespaces, dtypes[idx], dfc.shape[1]))
 
     # Drop columns that are expanded
     idxrem = idxrem1+idxrem2
     if len(idxrem)>0:
         # Remove the extracted column names from list and dict
-        df.drop(labels = df.columns[idxrem].values, axis=1, inplace=True)
         idxkeep = np.setdiff1d(np.arange(0, df.shape[1]), idxrem)
+        df.drop(labels = df.columns[idxrem].values, axis=1, inplace=True)
         dtypes = np.array(dtypes)
         dtypes = list(dtypes[idxkeep])
         # Combine the extracted list and dict data
@@ -307,9 +306,10 @@ def _deep_extract(df, dtypes, perc_min_num=None, verbose=3):
         # Combine into dataframe
         df = pd.concat([df, dftot], axis=1)
         dtypes = dtypes + dtypest
+        if verbose>=3: print('[df2onehot] >[%d] additional columns extracted by deep extract.' %(dftot1.shape[1]+dftot2.shape[1]))
 
     # Return
-    if verbose>=3: print('[df2onehot] >[%d] additional columns extracted by deep extract.' %(dftot1.shape[1]+dftot2.shape[1]))
+    if df.shape[1]!=len(dtypes): raise Exception('[df2onehot] >Error: size of dtypes and dataframe does not match.')
     return(df, dtypes)
 
 
@@ -326,38 +326,6 @@ def _make_columns_unique(dftot, verbose=3):
 def _findcol(x, cols):
     # SLICE COPY WARNING!
     return(np.isin(cols, x))
-
-
-# %% Example data
-# def import_example(getfile='titanic'):
-#     """Import example.
-
-#     Description
-#     -----------
-
-#     Parameters
-#     ----------
-#     getfile : String, optional
-#         'titanic'
-
-#     Returns
-#     -------
-#     df : DataFrame
-
-#     """
-
-#     if getfile=='titanic':
-#         getfile='titanic_train.zip'
-
-#     print('[df2onehot] >Loading %s..' %getfile)
-#     curpath = os.path.dirname(os.path.abspath(__file__))
-#     PATH_TO_DATA=os.path.join(curpath, 'data', getfile)
-#     if os.path.isfile(PATH_TO_DATA):
-#         df=pd.read_csv(PATH_TO_DATA, sep=',')
-#         return df
-#     else:
-#         print('[df2onehot] >Oops! Example data not found!')
-#         return None
 
 # %% Import example dataset from github.
 def import_example(data='titanic', url=None, sep=',', verbose=3):
