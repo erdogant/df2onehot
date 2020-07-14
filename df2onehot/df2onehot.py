@@ -328,33 +328,94 @@ def _findcol(x, cols):
 
 
 # %% Example data
-def import_example(getfile='titanic'):
-    """Import example.
+# def import_example(getfile='titanic'):
+#     """Import example.
 
+#     Description
+#     -----------
+
+#     Parameters
+#     ----------
+#     getfile : String, optional
+#         'titanic'
+
+#     Returns
+#     -------
+#     df : DataFrame
+
+#     """
+
+#     if getfile=='titanic':
+#         getfile='titanic_train.zip'
+
+#     print('[df2onehot] >Loading %s..' %getfile)
+#     curpath = os.path.dirname(os.path.abspath(__file__))
+#     PATH_TO_DATA=os.path.join(curpath, 'data', getfile)
+#     if os.path.isfile(PATH_TO_DATA):
+#         df=pd.read_csv(PATH_TO_DATA, sep=',')
+#         return df
+#     else:
+#         print('[df2onehot] >Oops! Example data not found!')
+#         return None
+
+# %% Import example dataset from github.
+def import_example(data='titanic', url=None, sep=',', verbose=3):
+    """Import example dataset from github source.
+    
     Description
     -----------
+    Import one of the few datasets from github source or specify your own download url link.
 
     Parameters
     ----------
-    getfile : String, optional
-        'titanic'
+    data : str
+        Name of datasets: 'sprinkler', 'titanic', 'student', 'fifa', 'cancer', 'waterpump', 'retail'
+    url : str
+        url link to to dataset.
+    verbose : int, (default: 3)
+        Print message to screen.
 
     Returns
     -------
-    df : DataFrame
+    pd.DataFrame()
+        Dataset containing mixed features.
 
     """
-
-    if getfile=='titanic':
-        getfile='titanic_train.zip'
-
-    print('[df2onehot] >Loading %s..' %getfile)
-    curpath = os.path.dirname(os.path.abspath(__file__))
-    PATH_TO_DATA=os.path.join(curpath, 'data', getfile)
-    if os.path.isfile(PATH_TO_DATA):
-        df=pd.read_csv(PATH_TO_DATA, sep=',')
-        return df
+    if url is None:
+        if data=='sprinkler':
+            url='https://erdogant.github.io/datasets/sprinkler.zip'
+        elif data=='titanic':
+            url='https://erdogant.github.io/datasets/titanic_train.zip'
+        elif data=='student':
+            url='https://erdogant.github.io/datasets/student_train.zip'
+        elif data=='cancer':
+            url='https://erdogant.github.io/datasets/cancer_dataset.zip'
+        elif data=='fifa':
+            url='https://erdogant.github.io/datasets/FIFA_2018.zip'
+        elif data=='waterpump':
+            url='https://erdogant.github.io/datasets/waterpump/waterpump_test.zip'
+        elif data=='retail':
+            url='https://erdogant.github.io/datasets/marketing_data_online_retail_small.zip'
     else:
-        print('[df2onehot] >Oops! Example data not found!')
+        data = wget.filename_from_url(url)
+
+    if url is None:
+        if verbose>=3: print('[hnet] >Nothing to download.')
         return None
+
+    curpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
+    PATH_TO_DATA = os.path.join(curpath, wget.filename_from_url(url))
+    if not os.path.isdir(curpath):
+        os.makedirs(curpath, exist_ok=True)
+
+    # Check file exists.
+    if not os.path.isfile(PATH_TO_DATA):
+        if verbose>=3: print('[hnet] >Downloading [%s] dataset from github source..' %(data))
+        wget.download(url, curpath)
+
+    # Import local dataset
+    if verbose>=3: print('[hnet] >Import dataset [%s]' %(data))
+    df = pd.read_csv(PATH_TO_DATA, sep=sep)
+    # Return
+    return df
 

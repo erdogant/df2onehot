@@ -1,6 +1,12 @@
 # %%
 import numpy as np
 import df2onehot
+print(df2onehot.__version__)
+
+
+# %%
+import numpy as np
+import df2onehot
 df = df2onehot.import_example()
 colnames = np.array(['3','4','5','6','7','8','9','11','10','1'])
 df['lists'] = np.nan
@@ -23,10 +29,6 @@ out = df2onehot.df2onehot(df)
 # out['onehot']
 out['numeric'][colnames]
 
-# %%
-import numpy as np
-import df2onehot
-print(df2onehot.__version__)
 
 # %% Load example
 df = df2onehot.import_example()
