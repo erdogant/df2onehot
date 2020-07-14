@@ -120,8 +120,8 @@ def _auto_dtypes(df, dtypes, deep_extract=False, perc_min_num=None, num_if_decim
             if dtypes[i]=='cat':
                 df.iloc[:,i] = _remove_non_ascii(df.iloc[:,i])
 
-            makespaces = ''.join([' '] * (max_str_len - len(df.columns[i])))
             try:
+                makespaces = ''.join([' '] * (max_str_len - len(df.columns[i])))
                 if verbose>=2: print('[df2onehot] >[%s]%s > %s > [%s] [%.0d]' %(df.columns[i], makespaces, logstr, dtypes[i], len(df.iloc[:,i].dropna().unique())))
             except:
                 if verbose>=2: print('[df2onehot] >[%s]%s > %s > [%s] [%.0d]' %(df.columns[i], makespaces, logstr, dtypes[i], len(df.iloc[:,i].dropna())))
