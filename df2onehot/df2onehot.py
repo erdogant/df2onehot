@@ -65,16 +65,18 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
     args['dtypes'] = dtypes
     args['verbose'] = verbose
     args['perc_min_num'] = perc_min_num
-    args['list_expand'] = list_expand
+    args['deep_extract'] = list_expand
     args['excl_background'] = excl_background
     labx = []
-    
+
     # Reset index
     df.reset_index(drop=True, inplace=True)
+    # Remove non-ascii chars
+    # df = _remove_non_ascii(df)
     # Determine Dtypes
-    df, dtypes = set_dtypes(df, args['dtypes'], is_list=args['list_expand'], perc_min_num=args['perc_min_num'], verbose=args['verbose'])
+    df, dtypes = set_dtypes(df, args['dtypes'], is_list=args['deep_extract'], perc_min_num=args['perc_min_num'], verbose=args['verbose'])
     # If any column is a list, also expand the list!
-    df, dtypes = _deep_extract(df, dtypes, args['verbose'])
+    df, dtypes = _deep_extract(df, dtypes, perc_min_num=args['perc_min_num'], verbose=args['verbose'])
 
     # Make empty frames
     out_numeric = pd.DataFrame()
@@ -195,8 +197,47 @@ def _concat(dftot, dfc):
                 dftot[colname] = dfc[colname].copy()
     return dftot
 
+def dict2df(dfc):
+    dftot = pd.DataFrame()
+    Iloc = ~dfc.isnull()
+    idx = np.where(Iloc)[0]
+    idxempty = list(np.where(Iloc==False)[0])
+
+    # result_list = [int(v) for k,v in dfc.iloc[i].items()]
+    # pd.DataFrame(data=dfc.iloc[i].items(), index=dfc.iloc[i].keys())
+
+    # Convert dict to dataframe
+    for i in idx:
+        # try:
+            # if isinstance(dict(), type(dfc.iloc[i])):
+            #     for key in dfc.iloc[i].keys():
+            #         print(key)
+            #         isinstance(dict, dfc.iloc[i][key])
+            #         pd.DataFrame.from_dict(dfc.iloc[i][key], orient='index')
+            # else:
+        dftmp = pd.DataFrame.from_dict(dfc.iloc[i], orient='index')
+        dftmp.rename(columns={0:i}, inplace=True)
+        # Combine into larger dataframe
+        dftot = pd.concat([dftot, dftmp], axis=1)
+        # except:
+        #     idxempty.append(i)
+
+    # Fill the empty ones with None
+    if not dftot.empty:
+        for i in idxempty:
+            dftmp = pd.DataFrame(index=dftot.index.values, data=[None]*len(dftot.index.values), columns=[i])
+            dftot = pd.concat([dftot, dftmp], axis=1)
+
+        # Transpose data and sort on index again
+        dftot = dftot.T
+        dftot.sort_index(inplace=True)
+        # Check
+        assert np.all(dftot.index.values==dfc.index.values)
+        
+    return(dftot, idxempty)
+
 # %%
-def _deep_extract(df, dtypes, verbose=3):
+def _deep_extract(df, dtypes, perc_min_num=None, verbose=3):
     # Check for any lists in dtypes
     Ilist = np.isin(dtypes,'list')
     Idict = np.isin(dtypes,'dict')
@@ -205,18 +246,26 @@ def _deep_extract(df, dtypes, verbose=3):
     idxrem1 = []
     idxrem2 = []
 
+
     # Expand dict
     if np.any(Idict):
+        if verbose >=3: print('[df2onehot] >\n[df2onehot] >Starting deep extraction..')
         idxCol = np.where(Idict)[0]
+        max_str_len = np.max(list(map(len, df.columns[idxCol].values.astype(str).tolist())))
         # Expand every columns that contains dict
         for idx in idxCol:
-            if verbose>=3: print('[df2onehot] >%s column is detected: [%s]' %(dtypes[idx], df.columns[idx]))
+            makespaces = ''.join([' '] * (max_str_len - len(df.columns[idx])))
             try:
-                dfc = pd.DataFrame.from_records(df.iloc[:,idx])
+                dfc, idxempty = dict2df(df.iloc[:, idx])
+                # dfc = pd.DataFrame.from_records(df.iloc[:,idx])
+                if verbose>=3: print('[df2onehot] >[%s]%s >deep extract > [%s] [%d]' %(df.columns[idx], makespaces, dtypes[idx], dfc.shape[1]))
             except:
-                if verbose>=3: print('[df2onehot] >%s failed to process [%s].' %(dtypes[idx], df.columns[idx]))
-                dfc = df.iloc[:,idx].astype(str)
+                if verbose>=3: print('[df2onehot] >[%s]%s >deep extract > [failed]' %(df.columns[idx], makespaces))
+                # dfc = df.iloc[:,idx].astype(str)
+                # dfc = dfc.apply(_remove_non_ascii)
 
+            # Remove non ascii chars
+            # dfc = _remove_non_ascii(dfc)
             # Combine extracted columns into big dataframe
             dftot1 = pd.concat([dftot1, dfc], axis=1)
             # Add idx to remove
@@ -225,9 +274,12 @@ def _deep_extract(df, dtypes, verbose=3):
     # Expand list
     if np.any(Ilist):
         idxCol = np.where(Ilist)[0]
+        max_str_len = np.max(list(map(len, df.columns[idxCol].values.astype(str).tolist())))
         # Expand every columns that contains either list
         for idx in idxCol:
-            if verbose>=3: print('[df2onehot] >%s column is detected: [%s]' %(dtypes[idx], df.columns[idx]))
+            makespaces = ''.join([' '] * (max_str_len - len(df.columns[idx])))
+            # if verbose>=3: print('[df2onehot] >%s column is detected: [%s]' %(dtypes[idx], df.columns[idx]))
+            if verbose>=3: print('[df2onehot] >[%s]%s >deep extract >[%s]' %(df.columns[idx], makespaces, dtypes[idx]))
             # Convert str/float/int to type
             df, uifeat = _col2type(df, dtypes, idx)
             # Convert column into onehot
@@ -240,28 +292,38 @@ def _deep_extract(df, dtypes, verbose=3):
     # Drop columns that are expanded
     idxrem = idxrem1+idxrem2
     if len(idxrem)>0:
+        # Remove the extracted column names from list and dict
         df.drop(labels = df.columns[idxrem].values, axis=1, inplace=True)
         idxkeep = np.setdiff1d(np.arange(0, df.shape[1]), idxrem)
         dtypes = np.array(dtypes)
         dtypes = list(dtypes[idxkeep])
-        # Do the typing
+        # Combine the extracted list and dict data
         dftot = pd.concat([dftot1, dftot2], axis=1)
-        dftot, dtypes1 = set_dtypes(dftot, verbose=3)
+        # Remove repetative column names
+        dftot = _make_columns_unique(dftot, verbose=verbose)
+        # Set dtypes
+        dftot, dtypest = set_dtypes(dftot, perc_min_num=perc_min_num, verbose=3)
         # Combine into dataframe
         df = pd.concat([df, dftot], axis=1)
-        dtypes = dtypes + dtypes1
-        # Set dtypes for lists to bool
-        # dtypes = np.array(dtypes).astype('O')
-        # dtypes[idxrem2]='bool'
-        # dtypes = list(dtypes)
+        dtypes = dtypes + dtypest
 
     # Return
     if verbose>=3: print('[df2onehot] >[%d] additional columns extracted by deep extract.' %(dftot1.shape[1]+dftot2.shape[1]))
     return(df, dtypes)
 
 
+# %% Remove repetative column
+def _make_columns_unique(dftot, verbose=3):
+    columns = dftot.columns.value_counts()
+    columns = columns[columns.values>1].index.values
+    if verbose>=3: print('[df2onehot] >[%d] repetative columns detected and a single one is taken: %s' %(len(columns), columns))
+    _, uiidx = np.unique(dftot.columns, return_index=True)
+    dftot = dftot.iloc[:,np.sort(uiidx)]
+    return dftot
+
 # %% Find columns
 def _findcol(x, cols):
+    # SLICE COPY WARNING!
     return(np.isin(cols, x))
 
 

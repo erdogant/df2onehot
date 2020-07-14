@@ -63,7 +63,7 @@ def _auto_dtypes(df, dtypes, is_list=False, perc_min_num=None, num_if_decimal=Tr
         dtypes = [''] * df.shape[1]
         logstr = '   '
 
-        for i in range(0,df.shape[1]):
+        for i in range(0, df.shape[1]):
             if 'float' in str(df.dtypes[i]):
                 dtypes[i]='num'
                 logstr = ('[float]')
@@ -80,7 +80,7 @@ def _auto_dtypes(df, dtypes, is_list=False, perc_min_num=None, num_if_decimal=Tr
             elif 'object' in str(df.dtypes[i]) and is_list:
                 # Check whether this is a list or array
                 logstr = ('[obj]  ')
-                tmpdf = df.iloc[:,i]
+                tmpdf = df.iloc[:, i]
                 tmpdf = tmpdf.loc[~tmpdf.isna()].values[0]
                 if isinstance(list(), type(tmpdf)):
                     dtypes[i]='list'
@@ -96,10 +96,10 @@ def _auto_dtypes(df, dtypes, is_list=False, perc_min_num=None, num_if_decimal=Tr
             else:
                 dtypes[i]='cat'
                 logstr = ('[???]  ')
-
+            
             # Force numerical if unique elements are above percentage
             if (perc_min_num is not None) and (('float' in str(df.dtypes[i])) or ('int' in str(df.dtypes[i]))):
-                tmpvalues=df.iloc[:,i].dropna().astype(float).copy()
+                tmpvalues = df.iloc[:,i].dropna().astype(float).copy()
                 perc=0
                 if len(tmpvalues)>0:
                     perc = (len(np.unique(tmpvalues)) / len(tmpvalues))
@@ -110,10 +110,13 @@ def _auto_dtypes(df, dtypes, is_list=False, perc_min_num=None, num_if_decimal=Tr
 
             # Force numerical if values are found with decimals
             if num_if_decimal and (('float' in str(df.dtypes[i])) or ('int' in str(df.dtypes[i]))):
-                tmpvalues = df.iloc[:,i].dropna().copy()
+                tmpvalues = df.iloc[:, i].dropna().copy()
                 if np.any(tmpvalues.astype(int) - tmpvalues.astype(float) > 0):
                     dtypes[i] = 'num'
                     logstr = ('[force]')
+
+            if dtypes[i]=='cat':
+                df.iloc[:,i] = _remove_non_ascii(df.iloc[:,i])
 
             # Force to exclude if categorical has only unique values
             # if dtypes[i]=='cat':
@@ -136,24 +139,27 @@ def _auto_dtypes(df, dtypes, is_list=False, perc_min_num=None, num_if_decimal=Tr
 # %% Setup columns in correct dtypes
 def _set_types(df, dtypes, verbose=3):
     assert len(dtypes)==df.shape[1], 'Number of dtypes and columns in df does not match'
+    max_str_len = np.max(list(map(len, df.columns.values.astype(str).tolist()))) + 2
 
     if verbose>=3: print('[df2onehot] >\n[df2onehot] >Setting dtypes in dataframe')
     # remcols=[]
-    for col,dtype in zip(df.columns, dtypes):
+    for col, dtype in zip(df.columns, dtypes):
+        makespaces = ''.join([' '] * (max_str_len - len(col)))
         if verbose>=4: print('[df2onehot] >%s' %(col))
+
         if dtype=='num':
             df[col]=df[col].astype(float)
         elif dtype=='cat':
-            df[col].loc[df[col].isna().values]=None
+            Inull = df[col].isna().values
+            df[col].loc[Inull] = None
             df[col] = df[col].astype(str)
             # df[col] = df[col].astype('category')
         elif dtype=='bool':
-            df[col].loc[df[col].isna().values]=None
+            Inull = df[col].isna().values
+            df[col].loc[Inull] = None
             df[col] = df[col].astype(bool)
         else:
-            if verbose>=2: print('[df2onehot] >[%s] [list] is used in dtyping!' %(col))
-            # df[col].loc[df[col].isna()]=None
-            # df[col] = df[col].astype(str)
+            if verbose>=4: print('[df2onehot] >[%s] %s > deep extract > [%s]' %(col, makespaces, dtype))
 
     return(df)
 
@@ -193,6 +199,26 @@ def set_y(y, y_min=None, numeric=False, verbose=3):
             y = label_encoder.fit_transform(y).astype(int)
 
     return(y)
+
+# %% function to remove non-ASCII
+def _remove_non_ascii(dfc):
+    # Get the current dtype
+    dftype = dfc.dtype
+    # Set as string
+    dfc = dfc.astype('str')
+    # Find the nans
+    Iloc = ~( (dfc.str.lower()=='nan') | (dfc.str.lower()=='none') | dfc.isnull() )
+    # Remove non-ascii chars
+    dfc.loc[Iloc] = np.array(list(map(lambda x: str(x).encode('ascii','ignore').decode('ascii','ignore').strip() , dfc.loc[Iloc])))
+    dfc.loc[Iloc] = np.array(list(map(lambda x: str(x).encode('unicode_escape').decode('ascii','ignore').strip(), dfc.loc[Iloc])))
+    dfc.loc[Iloc] = dfc.loc[Iloc].replace(r'\W+', ' ', regex=True)
+    dfc.loc[Iloc] = dfc.loc[Iloc].replace('[^\x00-\x7F]', ' ')
+    # Set the None back    
+    dfc.loc[~Iloc] = None
+    # Bring back to origial dtype
+    dfc = dfc.astype(dftype)
+    # Return    
+    return dfc
 
 
 # %% Convert to pandas dataframe
