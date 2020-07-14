@@ -320,7 +320,7 @@ def _extract_combine(df, dtypes, dftot1, dftot2, idxrem1, idxrem2, perc_min_num,
         # Remove repetative column names
         dftot = _make_columns_unique(dftot, verbose=verbose)
         # Set dtypes
-        dftot, dtypest = set_dtypes(dftot, perc_min_num=perc_min_num, deep_extract=True, verbose=3)
+        dftot, dtypest = set_dtypes(dftot, perc_min_num=perc_min_num, deep_extract=False, verbose=3)
         # Combine into dataframe
         df = pd.concat([df, dftot], axis=1)
         dtypes = dtypes + dtypest
