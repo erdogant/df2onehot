@@ -12,6 +12,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
 label_encoder = LabelEncoder()
+from tqdm import tqdm
 
 
 # %% Set dtypes
@@ -59,12 +60,13 @@ def set_dtypes(df, dtypes='pandas', deep_extract=False, perc_min_num=None, num_i
 # %% Setup columns in correct dtypes
 def _auto_dtypes(df, dtypes, deep_extract=False, perc_min_num=None, num_if_decimal=True, verbose=3):
     if isinstance(dtypes, str):
-        if verbose>=3: print('[df2onehot] >Auto detecting dtypes')
+        disable = (True if (verbose==0 or verbose>3) else False)
+        if verbose>=3: print('\n[df2onehot] >Auto detecting dtypes.')
         max_str_len = np.max(list(map(len, df.columns.values.astype(str).tolist())))
         dtypes = [''] * df.shape[1]
         logstr = '   '
 
-        for i in range(0, df.shape[1]):
+        for i in tqdm(range(0, df.shape[1]), disable=disable):
             if 'float' in str(df.dtypes[i]):
                 dtypes[i]='num'
                 logstr = ('[float]')
@@ -82,7 +84,11 @@ def _auto_dtypes(df, dtypes, deep_extract=False, perc_min_num=None, num_if_decim
                 # Check whether this is a list or array
                 logstr = ('[obj]  ')
                 tmpdf = df.iloc[:, i]
-                tmpdf = tmpdf.loc[~tmpdf.isna()].values[0]
+                Iloc = ~tmpdf.isna()
+                if np.any(Iloc):
+                    tmpdf = tmpdf.loc[Iloc].values[0]
+                else:
+                    tmpdf = None
                 if isinstance(list(), type(tmpdf)):
                     dtypes[i]='list'
                 elif 'numpy.ndarray' in str(type(tmpdf)):
@@ -122,9 +128,9 @@ def _auto_dtypes(df, dtypes, deep_extract=False, perc_min_num=None, num_if_decim
 
             try:
                 makespaces = ''.join([' '] * (max_str_len - len(df.columns[i])))
-                if verbose>=2: print('[df2onehot] >[%s]%s > %s > [%s] [%.0d]' %(df.columns[i], makespaces, logstr, dtypes[i], len(df.iloc[:,i].dropna().unique())))
+                if verbose>=4: print('[df2onehot] >[%s]%s > %s > [%s] [%.0d]' %(df.columns[i], makespaces, logstr, dtypes[i], len(df.iloc[:,i].dropna().unique())))
             except:
-                if verbose>=2: print('[df2onehot] >[%s]%s > %s > [%s] [%.0d]' %(df.columns[i], makespaces, logstr, dtypes[i], len(df.iloc[:,i].dropna())))
+                if verbose>=4: print('[df2onehot] >[%s]%s > %s > [%s] [%.0d]' %(df.columns[i], makespaces, logstr, dtypes[i], len(df.iloc[:,i].dropna())))
 
     # assert len(dtypes)==df.shape[1], 'Length of dtypes and dataframe columns does not match'
     return(dtypes)
@@ -135,7 +141,7 @@ def _set_types(df, dtypes, verbose=3):
     assert len(dtypes)==df.shape[1], 'Number of dtypes and columns in df does not match'
     max_str_len = np.max(list(map(len, df.columns.values.astype(str).tolist()))) + 2
 
-    if verbose>=3: print('[df2onehot] >\n[df2onehot] >Setting dtypes in dataframe')
+    if verbose>=3: print('[df2onehot] >Set dtypes in dataframe.')
     # remcols=[]
     for col, dtype in zip(df.columns, dtypes):
         makespaces = ''.join([' '] * (max_str_len - len(col)))
@@ -153,7 +159,7 @@ def _set_types(df, dtypes, verbose=3):
             df[col].loc[Inull] = None
             df[col] = df[col].astype(bool)
         else:
-            if verbose>=4: print('[df2onehot] >[%s] %s > deep extract > [%s]' %(col, makespaces, dtype))
+            if verbose>=5: print('[df2onehot] >[%s] %s > deep extract > [%s]' %(col, makespaces, dtype))
 
     return(df)
 

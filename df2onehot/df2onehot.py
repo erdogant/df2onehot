@@ -9,7 +9,9 @@
 
 # %% Libraries
 import wget
+import sys
 import os
+from tqdm import tqdm
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -70,6 +72,7 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
     args['deep_extract'] = deep_extract
     args['excl_background'] = excl_background
     labx = []
+    disable = (True if (verbose==0 or verbose>3) else False)
 
     # Reset index
     df.reset_index(drop=True, inplace=True)
@@ -80,17 +83,18 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
         df, dtypes = _deep_extract(df, dtypes, perc_min_num=args['perc_min_num'], verbose=args['verbose'])
 
     # Make empty frames
+    maxstring=50
     out_numeric = pd.DataFrame()
     out_onehot = pd.DataFrame()
-    max_str_len = np.max(list(map(len, df.columns.values.astype(str).tolist())))+2
+    max_str_len = np.minimum(np.max(list(map(len, df.columns.values.astype(str).tolist())))+2, maxstring)
 
     # Run over all columns
-    for i in np.arange(0, df.shape[1]):
-        makespaces = ''.join(['.'] * (max_str_len - len(df.columns[i])))
+    for i in tqdm(np.arange(0, df.shape[1]), disable=disable):
+        makespaces = ''.join(['.'] * np.minimum( (max_str_len - len(df.columns[i])), maxstring) )
         # Do not touch a float
         if 'float' in str(df.dtypes[i]):
             # if verbose>=3: print('[df2onehot] >Working on %s' %(df.columns[i]))
-            if verbose>=3: print('[df2onehot] >Working on %s%s[float]' %(df.columns[i], makespaces))
+            if verbose>=4: print('[df2onehot] >Processing: %s%s [float]' %(df.columns[i][0:maxstring], makespaces))
             out_numeric[df.columns[i]] = df.iloc[:,i]
             if hot_only is False:
                 out_onehot[df.columns[i]] = df.iloc[:,i]
@@ -102,7 +106,7 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
             # integer_encoded = set_y(integer_encoded, y_min=y_min, numeric=True, verbose=0)
             out_numeric[df.columns[i]] = integer_encoded
             out_numeric[df.columns[i]] = out_numeric[df.columns[i]].astype('category')
-            if verbose>=3: print('[df2onehot] >Working on %s%s[%.0f]' %(df.columns[i], makespaces, len(np.unique(integer_encoded)) ))
+            if verbose>=3: print('[df2onehot] >Processing: %s%s [%.0f]' %(df.columns[i][0:maxstring], makespaces, len(np.unique(integer_encoded)) ))
 
             # Contains a single value or is bool
             if (len(np.unique(integer_encoded))<=1) or (str(df.dtypes[i])=='bool'):
@@ -130,7 +134,7 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
                     out_numeric[df.columns[i]] = (onehot_encoded * np.arange(1,onehot_encoded.shape[1] + 1)).sum(axis=1)
 
     uiy, ycounts = np.unique(labx, return_counts=True)
-    if verbose >=3: print('[df2onehot] >\n[df2onehot] >Total onehot features: %.0d' %(np.sum(ycounts)))
+    if verbose >=3: print('[df2onehot] >Total onehot features: %.0d' %(np.sum(ycounts)))
     # idx = np.argsort(ycounts)[::-1]
     # print(np.c_[uiy[idx], ycounts[idx]])
 
@@ -151,32 +155,42 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
 
 
 # %% Convert str/float/int to type
-def _col2type(df, dtypes, idx):
-    gettype = dtypes[idx]
+def _col2type(dfc, verbose=3):
+    # dtype = dtypes[idx]
     # Gather only the not NaN rows
-    Inan = df.iloc[:, idx].isna()
+    Inan = dfc.isna()
     # Grap only unique elements from the combined set of lists
-    dfcol = df.iloc[~Inan.values, idx].copy()
+    dfcol = dfc.iloc[~Inan.values].copy()
+    # Remvoe empty lists
+    # Inan = dfcol.apply(len)==0
+    # dfcol = dfcol[~Inan.values]
+    
     # If any str, float or int elements is fount, convert to list
-    if gettype=='list':
-        typing = list(map(type, dfcol.values))
-        Iloc = np.logical_or(list(map(lambda x: isinstance(str(), x), typing)), np.logical_or(list(map(lambda x: isinstance(float(), x), typing)), list(map(lambda x: isinstance(int(), x), typing))))
-        if np.any(Iloc):
-            # Convert to string! This is required because the colnames also converts all to string.
-            dfcol.loc[Iloc] = list(map(lambda x: [str(x)], dfcol.loc[Iloc]))
-            df.iloc[dfcol.loc[Iloc].index,idx] = dfcol.loc[Iloc]
+    # if dtype=='list':
+    typing = list(map(type, dfcol.values))
+    Iloc = np.logical_or(list(map(lambda x: isinstance(str(), x), typing)), np.logical_or(list(map(lambda x: isinstance(float(), x), typing)), list(map(lambda x: isinstance(int(), x), typing))))
+    if np.any(Iloc):
+        # Convert to string! This is required because the colnames also converts all to string.
+        dfcol.loc[Iloc] = list(map(lambda x: [str(x)], dfcol.loc[Iloc]))
+        dfc.iloc[dfcol.loc[Iloc].index] = dfcol.loc[Iloc]
 
     # Get all unique elements
-    uifeat = _get_unique_elements(dfcol)
+    uifeat = _get_unique_elements(dfcol, verbose=verbose)
     # Return
-    return(df, uifeat)
+    return(dfc, uifeat)
 
-def _get_unique_elements(dfcol):
-    # Get all unique elements
-    listvector = list(map(lambda x: list(x) , dfcol))
-    listvector = sum(listvector, [])
-    # All elements are converted to string!
-    uifeat = np.unique(listvector)
+def _get_unique_elements(dfcol, verbose=3):
+    try:
+        # Get all unique elements
+        listvector = list(map(lambda x: list(x) , dfcol))
+        listvector = sum(listvector, [])
+        # All elements are converted to string!
+        uifeat = np.unique(listvector)
+    except:
+        # if verbose>=1: print('[df2onehot] >Error catched:' %(str(sys.exc_info()[0])))
+        if verbose>=1: print('[df2onehot] >Error catched.')
+        uifeat = None
+
     return uifeat
 
 def _array2df(df, uifeat, idx):
@@ -252,24 +266,25 @@ def _deep_extract(df, dtypes, perc_min_num=None, verbose=3):
 
 # %%
 def _extract_dict(df, dtypes, verbose=3):
+    disable = (True if (verbose==0 or verbose>3) else False)
     dfout = pd.DataFrame()
     idxrem = []
     Idict = np.isin(dtypes,'dict')
-    
+
     # Expand dict
     if np.any(Idict):
-        if verbose >=3: print('[df2onehot] >\n[df2onehot] >Deep extraction..')
+        if verbose >=3: print('[df2onehot] >Deep extract..')
         idxCol = np.where(Idict)[0]
         max_str_len = np.max(list(map(len, df.columns[idxCol].values.astype(str).tolist())))
         # Expand every columns that contains dict
-        for idx in idxCol:
+        for idx in tqdm(idxCol, disable=disable):
             makespaces = ''.join([' '] * (max_str_len - len(df.columns[idx])))
             try:
                 dfc, idxempty = dict2df(df.iloc[:, idx])
                 # dfc = pd.DataFrame.from_records(df.iloc[:,idx])
-                if verbose>=3: print('[df2onehot] >[%s]%s >deep extract > [%s]  [%d]' %(df.columns[idx], makespaces, dtypes[idx], dfc.shape[1]))
+                if verbose>=4: print('[df2onehot] >[%s]%s >deep extract > [%s]  [%d]' %(df.columns[idx], makespaces, dtypes[idx], dfc.shape[1]))
             except:
-                if verbose>=3: print('[df2onehot] >[%s]%s >deep extract > [failed]' %(df.columns[idx], makespaces))
+                if verbose>=4: print('[df2onehot] >[%s]%s >deep extract > [failed]' %(df.columns[idx], makespaces))
                 # dfc = df.iloc[:,idx].astype(str)
                 # dfc = dfc.apply(_remove_non_ascii)
 
@@ -282,6 +297,7 @@ def _extract_dict(df, dtypes, verbose=3):
 
 # %%
 def _extract_list(df, dtypes, verbose=3):
+    disable = (True if (verbose==0 or verbose>3) else False)
     Ilist = np.isin(dtypes,'list')
     dfout = pd.DataFrame()
     idxrem = []
@@ -291,17 +307,21 @@ def _extract_list(df, dtypes, verbose=3):
         idxCol = np.where(Ilist)[0]
         max_str_len = np.max(list(map(len, df.columns[idxCol].values.astype(str).tolist())))
         # Expand every columns that contains either list
-        for idx in idxCol:
+        for idx in tqdm(idxCol, disable=disable):
             makespaces = ''.join([' '] * (max_str_len - len(df.columns[idx])))
-            # Convert str/float/int to type
-            df, uifeat = _col2type(df, dtypes, idx)
+            # Convert str/float/int to list
+            # df, uifeat = _col2type(df, dtypes, idx)
+            df.iloc[:,idx], uifeat = _col2type(df.iloc[:,idx], verbose=verbose)
+            
             # Convert column into onehot
-            dfc = _array2df(df, uifeat, idx)
-            # Combine hot-dataframes into one big dataframe
-            dfout = _concat(dfout, dfc)
+            if uifeat is not None:
+                dfc = _array2df(df, uifeat, idx)
+                # Combine hot-dataframes into one big dataframe
+                dfout = _concat(dfout, dfc)
+
             # Add idx to remove
             idxrem.append(idx)
-            if verbose>=3: print('[df2onehot] >[%s]%s >deep extract > [%s]  [%d]' %(df.columns[idx], makespaces, dtypes[idx], dfc.shape[1]))
+            if verbose>=4: print('[df2onehot] >[%s]%s >deep extract > [%s]  [%d]' %(df.columns[idx], makespaces, dtypes[idx], dfc.shape[1]))
     
     return dfout, idxrem
 
@@ -324,7 +344,7 @@ def _extract_combine(df, dtypes, dftot1, dftot2, idxrem1, idxrem2, perc_min_num,
         # Combine into dataframe
         df = pd.concat([df, dftot], axis=1)
         dtypes = dtypes + dtypest
-        if verbose>=3: print('[df2onehot] >[%d] additional columns extracted by deep extract.' %(dftot1.shape[1]+dftot2.shape[1]))
+        if verbose>=3: print('[df2onehot] >Deep extract extracted: [%d] features.' %(dftot1.shape[1]+dftot2.shape[1]))
     return df, dtypes
 
 # %% Remove repetative column
