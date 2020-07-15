@@ -21,7 +21,7 @@ def test_df2onehot():
     df = import_example()
 
     # TEST 3:
-    out = df2onehot(df, perc_min_num=0.8)
+    out = df2onehot(df, deep_extract=False, perc_min_num=0.8)
     [uiy, ycounts] = np.unique(out['labx'], return_counts=True)
     assert np.all(ycounts==np.array([148,   4, 891,   7,   3,   2,   7,   2, 681]))
     # TEST 4:
@@ -54,7 +54,7 @@ def test_df2onehot():
     df['lists'].iloc[890] = 1
 
     # Run df2onehot
-    out = df2onehot(df)
+    out = df2onehot(df, deep_extract=True)
     counts = out['numeric'][list(colnames)].sum(axis=1)
     # Make some checks
     for i in range(0,df.shape[0]):
@@ -74,7 +74,8 @@ def test_df2onehot():
     df['lists'].iloc[890] = 1
 
     # Run df2onehot
-    out = df2onehot(df)
+    del out
+    out = df2onehot(df, deep_extract=True)
     counts = out['numeric'][list(colnames)].sum(axis=1)
     # Make some checks
     for i in range(0,df.shape[0]):
