@@ -20,7 +20,7 @@ onehot_encoder = OneHotEncoder(sparse=False, categories='auto')
 
 
 # %% Dataframe to one-hot
-def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True, deep_extract=True, excl_background=None, verbose=3):
+def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True, deep_extract=False, excl_background=None, verbose=3):
     """Convert dataframe to one-hot matrix.
 
     Parameters
