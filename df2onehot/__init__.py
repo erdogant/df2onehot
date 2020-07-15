@@ -11,7 +11,7 @@ from df2onehot.set_dtypes import (
 
 __author__ = 'Erdogan Tasksen'
 __email__ = 'erdogant@gmail.com'
-__version__ = '0.2.11'
+__version__ = '0.2.12'
 
 # module level doc-string
 __doc__ = """
