@@ -188,7 +188,7 @@ def _get_unique_elements(dfcol, verbose=3):
         uifeat = np.unique(listvector)
     except:
         # if verbose>=1: print('[df2onehot] >Error catched:' %(str(sys.exc_info()[0])))
-        if verbose>=1: print('[df2onehot] >Error catched.')
+        if verbose>=5: print('[df2onehot] >Error catched.')
         uifeat = None
 
     return uifeat
@@ -253,6 +253,7 @@ def dict2df(dfc):
 
 # %%
 def _deep_extract(df, dtypes, perc_min_num=None, verbose=3):
+    if verbose >=3: print('[df2onehot] >Deep extract..')
     # Extract dict
     dftot1, idxrem1 = _extract_dict(df, dtypes, verbose=verbose)
     # Extract lists
@@ -273,7 +274,7 @@ def _extract_dict(df, dtypes, verbose=3):
 
     # Expand dict
     if np.any(Idict):
-        if verbose >=3: print('[df2onehot] >Deep extract..')
+        if verbose >=3: print('[df2onehot] >Deep extraction of dictionaries..')
         idxCol = np.where(Idict)[0]
         max_str_len = np.max(list(map(len, df.columns[idxCol].values.astype(str).tolist())))
         # Expand every columns that contains dict
@@ -297,6 +298,7 @@ def _extract_dict(df, dtypes, verbose=3):
 
 # %%
 def _extract_list(df, dtypes, verbose=3):
+    if verbose >=3: print('[df2onehot] >Deep extraction of lists..')
     disable = (True if (verbose==0 or verbose>3) else False)
     Ilist = np.isin(dtypes,'list')
     dfout = pd.DataFrame()
@@ -327,8 +329,9 @@ def _extract_list(df, dtypes, verbose=3):
 
 # %%
 def _extract_combine(df, dtypes, dftot1, dftot2, idxrem1, idxrem2, perc_min_num, verbose=3):
+    if verbose>=3: print('[df2onehot] >Deep extract merging..')
     # Drop columns that are expanded
-    idxrem = idxrem1+idxrem2
+    idxrem = idxrem1 + idxrem2
     if len(idxrem)>0:
         # Remove the extracted column names from list and dict
         idxkeep = np.setdiff1d(np.arange(0, df.shape[1]), idxrem)
@@ -351,14 +354,14 @@ def _extract_combine(df, dtypes, dftot1, dftot2, idxrem1, idxrem2, perc_min_num,
 def _make_columns_unique(dftot, verbose=3):
     columns = dftot.columns.value_counts()
     columns = columns[columns.values>1].index.values
-    if verbose>=3: print('[df2onehot] >[%d] repetative columns detected and a single one is taken: %s' %(len(columns), columns))
+    if verbose>=3: print('[df2onehot] >[%d] repetative columns detected: %s' %(len(columns), columns))
 
     # for column in columns:
     #     dfc = dftot[column]
     #     dfmerged = dfc.stack().groupby(level=0).apply(lambda x: x.unique().tolist())
 
     _, uiidx = np.unique(dftot.columns, return_index=True)
-    dftot = dftot.iloc[:,np.sort(uiidx)]
+    dftot = dftot.iloc[:, np.sort(uiidx)]
     return dftot
 
 # %% Find columns
@@ -369,7 +372,7 @@ def _findcol(x, cols):
 # %% Import example dataset from github.
 def import_example(data='titanic', url=None, sep=',', verbose=3):
     """Import example dataset from github source.
-    
+
     Description
     -----------
     Import one of the few datasets from github source or specify your own download url link.

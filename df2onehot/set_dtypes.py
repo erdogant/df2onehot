@@ -60,8 +60,8 @@ def set_dtypes(df, dtypes='pandas', deep_extract=False, perc_min_num=None, num_i
 # %% Setup columns in correct dtypes
 def _auto_dtypes(df, dtypes, deep_extract=False, perc_min_num=None, num_if_decimal=True, verbose=3):
     if isinstance(dtypes, str):
-        disable = (True if (verbose==0 or verbose>3) else False)
         if verbose>=3: print('\n[df2onehot] >Auto detecting dtypes.')
+        disable = (True if (verbose==0 or verbose>3) else False)
         max_str_len = np.max(list(map(len, df.columns.values.astype(str).tolist())))
         dtypes = [''] * df.shape[1]
         logstr = '   '
@@ -139,9 +139,9 @@ def _auto_dtypes(df, dtypes, deep_extract=False, perc_min_num=None, num_if_decim
 # %% Setup columns in correct dtypes
 def _set_types(df, dtypes, verbose=3):
     assert len(dtypes)==df.shape[1], 'Number of dtypes and columns in df does not match'
+    if verbose>=3: print('[df2onehot] >Set dtypes in dataframe..')
     max_str_len = np.max(list(map(len, df.columns.values.astype(str).tolist()))) + 2
 
-    if verbose>=3: print('[df2onehot] >Set dtypes in dataframe.')
     # remcols=[]
     for col, dtype in zip(df.columns, dtypes):
         makespaces = ''.join([' '] * (max_str_len - len(col)))
@@ -209,7 +209,7 @@ def _remove_non_ascii(dfc):
     # Find the nans
     Iloc = ~( (dfc.str.lower()=='nan') | (dfc.str.lower()=='none') | dfc.isnull() )
     # Remove non-ascii chars
-    dfc.loc[Iloc] = np.array(list(map(lambda x: str(x).encode('ascii','ignore').decode('ascii','ignore').strip() , dfc.loc[Iloc])))
+    dfc.loc[Iloc] = np.array(list(map(lambda x: str(x).encode('ascii','ignore').decode('ascii','ignore').strip(), dfc.loc[Iloc])))
     dfc.loc[Iloc] = np.array(list(map(lambda x: str(x).encode('unicode_escape').decode('ascii','ignore').strip(), dfc.loc[Iloc])))
     dfc.loc[Iloc] = dfc.loc[Iloc].replace(r'\W+', ' ', regex=True)
     dfc.loc[Iloc] = dfc.loc[Iloc].replace('[^\x00-\x7F]', ' ')
