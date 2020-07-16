@@ -211,15 +211,14 @@ def _remove_non_ascii(dfc):
     # Remove non-ascii chars
     dfc.loc[Iloc] = np.array(list(map(lambda x: str(x).encode('ascii','ignore').decode('ascii','ignore').strip(), dfc.loc[Iloc])))
     dfc.loc[Iloc] = np.array(list(map(lambda x: str(x).encode('unicode_escape').decode('ascii','ignore').strip(), dfc.loc[Iloc])))
-    dfc.loc[Iloc] = dfc.loc[Iloc].replace(r'\W+', ' ', regex=True)
+    # dfc.loc[Iloc] = dfc.loc[Iloc].replace(r'\W+', ' ', regex=True)
     dfc.loc[Iloc] = dfc.loc[Iloc].replace('[^\x00-\x7F]', ' ')
     # Set the None back    
     dfc.loc[~Iloc] = None
     # Bring back to origial dtype
     dfc = dfc.astype(dftype)
-    # Return    
+    # Return
     return dfc
-
 
 # %% Convert to pandas dataframe
 def is_DataFrame(data, verbose=3):
