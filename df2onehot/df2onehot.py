@@ -253,7 +253,7 @@ def dict2df(dfc):
 
 # %%
 def _deep_extract(df, dtypes, perc_min_num=None, verbose=3):
-    if verbose >=3: print('[df2onehot] >Deep extract..')
+    if verbose>=4: print('\n[df2onehot] >Deep extract..')
     # Extract dict
     dftot1, idxrem1 = _extract_dict(df, dtypes, verbose=verbose)
     # Extract lists
@@ -329,7 +329,7 @@ def _extract_list(df, dtypes, verbose=3):
 
 # %%
 def _extract_combine(df, dtypes, dftot1, dftot2, idxrem1, idxrem2, perc_min_num, verbose=3):
-    if verbose>=3: print('[df2onehot] >Deep extract merging..')
+    if verbose>=3: print('\n[df2onehot] >Deep extract merging..')
     # Drop columns that are expanded
     idxrem = idxrem1 + idxrem2
     if len(idxrem)>0:
@@ -347,14 +347,14 @@ def _extract_combine(df, dtypes, dftot1, dftot2, idxrem1, idxrem2, perc_min_num,
         # Combine into dataframe
         df = pd.concat([df, dftot], axis=1)
         dtypes = dtypes + dtypest
-        if verbose>=3: print('[df2onehot] >Deep extract extracted: [%d] features.' %(dftot1.shape[1]+dftot2.shape[1]))
+        if verbose>=3: print('\n[df2onehot] >Deep extract extracted: [%d] features.' %(dftot1.shape[1]+dftot2.shape[1]))
     return df, dtypes
 
 # %% Remove repetative column
 def _make_columns_unique(dftot, verbose=3):
     columns = dftot.columns.value_counts()
     columns = columns[columns.values>1].index.values
-    if verbose>=3: print('[df2onehot] >[%d] repetative columns detected: %s' %(len(columns), columns))
+    if verbose>=4: print('[df2onehot] >[%d] repetative columns detected: %s' %(len(columns), columns))
 
     # for column in columns:
     #     dfc = dftot[column]

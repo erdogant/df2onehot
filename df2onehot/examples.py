@@ -36,7 +36,7 @@ df = df2onehot.import_example()
 
 # %% Convert
 out = df2onehot.df2onehot(df)
-
+out['numeric']
 
 # %% Force feature (int or float) to be numeric if unique non-zero values are above percentage.
 out = df2onehot.df2onehot(df, perc_min_num=0.8)
