@@ -1,12 +1,8 @@
 # %%
 import numpy as np
 import df2onehot
-print(df2onehot.__version__)
+# print(df2onehot.__version__)
 
-
-# %%
-import numpy as np
-import df2onehot
 df = df2onehot.import_example()
 colnames = np.array(['3','4','5','6','7','8','9','11','10','1'])
 df['lists'] = np.nan
@@ -22,7 +18,7 @@ df['list2'].iloc[890] = 1
 df['list2'].iloc[888] = 10
 
 # Run df2onehot
-out = df2onehot.df2onehot(df)
+out = df2onehot.df2onehot(df, deep_extract=True)
 
 # # TEST 1: check output is unchanged
 # out = df2onehot(df)
