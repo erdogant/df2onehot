@@ -87,7 +87,7 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
     maxstring=50
     out_numeric = pd.DataFrame()
     out_onehot = pd.DataFrame()
-    max_str_len = np.minimum(np.max(list(map(len, df.columns.values.astype(str).tolist())))+2, maxstring)
+    max_str_len = np.minimum(np.max(list(map(len, df.columns.values.astype(str).tolist()))) + 2, maxstring)
 
     # Run over all columns
     for i in tqdm(np.arange(0, df.shape[1]), disable=disable):
@@ -96,14 +96,14 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
         if 'float' in str(df.dtypes[i]):
             # if verbose>=3: print('[df2onehot] >Working on %s' %(df.columns[i]))
             if verbose>=4: print('[df2onehot] >Processing: %s%s [float]' %(df.columns[i][0:maxstring], makespaces))
-            out_numeric[df.columns[i]] = df.iloc[:,i]
+            out_numeric[df.columns[i]] = df.iloc[:, i]
             if hot_only is False:
-                out_onehot[df.columns[i]] = df.iloc[:,i]
+                out_onehot[df.columns[i]] = df.iloc[:, i]
                 labx.append(df.columns[i])
         else:
-            integer_encoded = label_encoder.fit_transform(df.iloc[:,i])
+            integer_encoded = label_encoder.fit_transform(df.iloc[:, i])
             # If all values are the same, the encoder will return 0 (=False). We set values at 1 (by +1) and make them True. Otherwise it can be mis interpreted the the value was not present in the datset.
-            if np.all(np.unique(integer_encoded)==0): integer_encoded=integer_encoded+1
+            if np.all(np.unique(integer_encoded)==0): integer_encoded=integer_encoded + 1
             # integer_encoded = set_y(integer_encoded, y_min=y_min, numeric=True, verbose=0)
             out_numeric[df.columns[i]] = integer_encoded
             out_numeric[df.columns[i]] = out_numeric[df.columns[i]].astype('category')
@@ -118,21 +118,21 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
                 onehot_encoded = onehot_encoder.fit_transform(integer_encoded.reshape(-1, 1))
                 # Remove columns if it does not fullfill minimum nr. of samples (>=y_min)
                 if y_min is not None:
-                    onehot_encoded = onehot_encoded[:,onehot_encoded.sum(axis=0)>=y_min]
+                    onehot_encoded = onehot_encoded[:, onehot_encoded.sum(axis=0) >= y_min]
                 # Make new one-hot columns
-                for k in range(0,onehot_encoded.shape[1]):
+                for k in range(0, onehot_encoded.shape[1]):
                     # Get the colname based on the value in the orignal dataframe
-                    label=df.iloc[onehot_encoded[:,k]==1,i].unique().astype(str)[0]
+                    label = df.iloc[onehot_encoded[:,k]==1, i].unique().astype(str)[0]
 
                     # Check whether this is a label that should be excluded.
                     if (isinstance(args['excl_background'], type(None))) or (not np.isin(label, args['excl_background'])):
                         colname = df.columns[i] + '_' + label
-                        out_onehot[colname] = onehot_encoded[:,k].astype('Bool')
+                        out_onehot[colname] = onehot_encoded[:, k].astype('Bool')
                         labx.append(df.columns[i])
 
                 # Make numerical vector
                 if onehot_encoded.shape[1]>2:
-                    out_numeric[df.columns[i]] = (onehot_encoded * np.arange(1,onehot_encoded.shape[1] + 1)).sum(axis=1)
+                    out_numeric[df.columns[i]] = (onehot_encoded * np.arange(1, onehot_encoded.shape[1] + 1)).sum(axis=1)
 
     uiy, ycounts = np.unique(labx, return_counts=True)
     if verbose >=3: print('[df2onehot] >Total onehot features: %.0d' %(np.sum(ycounts)))
@@ -144,8 +144,8 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
     dtypes = np.array(dtypes)
     if y_min is not None:
         Iloc = (out_onehot.sum(axis=0)>=y_min).values
-        out_onehot = out_onehot.loc[:,Iloc]
-        labx=labx[Iloc]
+        out_onehot = out_onehot.loc[:, Iloc]
+        labx = labx[Iloc]
 
     out = {}
     out['numeric'] = out_numeric
@@ -165,7 +165,7 @@ def _col2type(dfc, verbose=3):
     # Remvoe empty lists
     # Inan = dfcol.apply(len)==0
     # dfcol = dfcol[~Inan.values]
-    
+
     # If any str, float or int elements is fount, convert to list
     # if dtype=='list':
     typing = list(map(type, dfcol.values))
@@ -194,12 +194,14 @@ def _get_unique_elements(dfcol, verbose=3):
 
     return uifeat
 
+
 def _array2df(df, uifeat, idx):
     # Lookup colname in the vector and make array
-    dfcol = df.iloc[:,idx].apply(_findcol, cols=uifeat)
+    dfcol = df.iloc[:, idx].apply(_findcol, cols=uifeat)
     arr = np.concatenate(dfcol).reshape((dfcol.shape[0], dfcol[0].shape[0]))
-    dfhot = pd.DataFrame(index=np.arange(0,df.shape[0]), columns=uifeat, data=arr, dtype='bool')
+    dfhot = pd.DataFrame(index=np.arange(0, df.shape[0]), columns=uifeat, data=arr, dtype='bool')
     return dfhot
+
 
 def _concat(dftot, dfc):
     # Combine in one big matrix
@@ -212,6 +214,7 @@ def _concat(dftot, dfc):
             else:
                 dftot[colname] = dfc[colname].copy()
     return dftot
+
 
 def dict2df(dfc):
     dftot = pd.DataFrame()
@@ -241,7 +244,7 @@ def dict2df(dfc):
     # Fill the empty ones with None
     if not dftot.empty:
         for i in idxempty:
-            dftmp = pd.DataFrame(index=dftot.index.values, data=[None]*len(dftot.index.values), columns=[i])
+            dftmp = pd.DataFrame(index=dftot.index.values, data=[None] * len(dftot.index.values), columns=[i])
             dftot = pd.concat([dftot, dftmp], axis=1)
 
         # Transpose data and sort on index again
@@ -249,8 +252,9 @@ def dict2df(dfc):
         dftot.sort_index(inplace=True)
         # Check
         assert np.all(dftot.index.values==dfc.index.values)
-        
+
     return(dftot, idxempty)
+
 
 # %%
 def _deep_extract(df, dtypes, perc_min_num=None, verbose=3):
@@ -267,12 +271,13 @@ def _deep_extract(df, dtypes, perc_min_num=None, verbose=3):
     if df.shape[1]!=len(labels): raise Exception('[df2onehot] >Error: size of dtypes and dataframe does not match.')
     return(df, dtypes)
 
+
 # %%
 def _extract_dict(df, dtypes, verbose=3):
     disable = (True if (verbose==0 or verbose>3) else False)
     dfout = pd.DataFrame()
     idxrem = []
-    Idict = np.isin(dtypes,'dict')
+    Idict = np.isin(dtypes, 'dict')
     label = []
 
     # Expand dict
@@ -287,7 +292,7 @@ def _extract_dict(df, dtypes, verbose=3):
                 dfc, idxempty = dict2df(df.iloc[:, idx])
                 # dfc = pd.DataFrame.from_records(df.iloc[:,idx])
                 # Store the original label
-                label = label + [df.columns[idx]]*dfc.shape[1]
+                label = label + [df.columns[idx]] * dfc.shape[1]
                 if verbose>=4: print('[df2onehot] >[%s]%s >deep extract > [%s]  [%d]' %(df.columns[idx], makespaces, dtypes[idx], dfc.shape[1]))
             except:
                 if verbose>=4: print('[df2onehot] >[%s]%s >deep extract > [failed]' %(df.columns[idx], makespaces))
@@ -298,14 +303,15 @@ def _extract_dict(df, dtypes, verbose=3):
             dfout = pd.concat([dfout, dfc], axis=1)
             # Add idx to remove
             idxrem.append(idx)
-    
+
     return dfout, label, idxrem
+
 
 # %%
 def _extract_list(df, dtypes, verbose=3):
     if verbose >=3: print('[df2onehot] >Deep extraction of lists..')
     disable = (True if (verbose==0 or verbose>3) else False)
-    Ilist = np.isin(dtypes,'list')
+    Ilist = np.isin(dtypes, 'list')
     dfout = pd.DataFrame()
     idxrem = []
     label = []
@@ -319,21 +325,22 @@ def _extract_list(df, dtypes, verbose=3):
             makespaces = ''.join([' '] * (max_str_len - len(df.columns[idx])))
             # Convert str/float/int to list
             # df, uifeat = _col2type(df, dtypes, idx)
-            df.iloc[:,idx], uifeat = _col2type(df.iloc[:,idx], verbose=verbose)
-            
+            df.iloc[:, idx], uifeat = _col2type(df.iloc[:, idx], verbose=verbose)
+
             # Convert column into onehot
             if uifeat is not None:
                 dfc = _array2df(df, uifeat, idx)
                 # Combine hot-dataframes into one big dataframe
                 dfout = _concat(dfout, dfc)
                 # Store the original label
-                label = label + [df.columns[idx]]*dfc.shape[1]
+                label = label + [df.columns[idx]] * dfc.shape[1]
 
             # Add idx to remove
             idxrem.append(idx)
             if verbose>=4: print('[df2onehot] >[%s]%s >deep extract > [%s]  [%d]' %(df.columns[idx], makespaces, dtypes[idx], dfc.shape[1]))
-    
+
     return dfout, label, idxrem
+
 
 # %%
 def _extract_combine(df, dtypes, dftot1, dftot2, idxrem1, idxrem2, label1, label2, perc_min_num, verbose=3):
@@ -358,8 +365,9 @@ def _extract_combine(df, dtypes, dftot1, dftot2, idxrem1, idxrem2, label1, label
         df = pd.concat([df, dftot], axis=1)
         dtypes = dtypes + dtypest
         labels = list(dflabels) + labeltot
-        if verbose>=3: print('\n[df2onehot] >Deep extract extracted: [%d] features.' %(dftot1.shape[1]+dftot2.shape[1]))
+        if verbose>=3: print('\n[df2onehot] >Deep extract extracted: [%d] features.' %(dftot1.shape[1] + dftot2.shape[1]))
     return df, dtypes, labels
+
 
 # %% Remove repetative column
 def _make_columns_unique(dftot, labeltot, verbose=3):
@@ -375,14 +383,16 @@ def _make_columns_unique(dftot, labeltot, verbose=3):
     uiidx = np.sort(uiidx)
     dftot = dftot.iloc[:, uiidx]
     labeltot = list(np.array(labeltot)[uiidx])
-    
+
     if len(labeltot)!=dftot.shape[1]: raise Exception('[df2onehot] Error: The total labels and combined dataframe has not same size.')
     return dftot, labeltot
+
 
 # %% Find columns
 def _findcol(x, cols):
     # SLICE COPY WARNING!
     return(np.isin(cols, x))
+
 
 # %% Import example dataset from github.
 def import_example(data='titanic', url=None, sep=',', verbose=3):
@@ -444,4 +454,3 @@ def import_example(data='titanic', url=None, sep=',', verbose=3):
     df = pd.read_csv(PATH_TO_DATA, sep=sep)
     # Return
     return df
-
