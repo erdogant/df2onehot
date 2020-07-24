@@ -16,8 +16,8 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
-# from df2onehot.set_dtypes import set_dtypes
-from set_dtypes import set_dtypes
+from df2onehot.utils import set_dtypes
+# from set_dtypes import set_dtypes
 label_encoder = LabelEncoder()
 onehot_encoder = OneHotEncoder(sparse=False, categories='auto')
 
@@ -73,6 +73,7 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
     args['deep_extract'] = deep_extract
     args['excl_background'] = excl_background
     labx = []
+    labels = None
     disable = (True if (verbose==0 or verbose>3) else False)
 
     # Reset index
@@ -81,7 +82,7 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
     df, dtypes = set_dtypes(df, args['dtypes'], deep_extract=args['deep_extract'], perc_min_num=args['perc_min_num'], verbose=args['verbose'])
     # If any column is a list, also expand the list!
     if args['deep_extract']:
-        df, dtypes = _deep_extract(df, dtypes, perc_min_num=args['perc_min_num'], verbose=args['verbose'])
+        df, dtypes, labels = _deep_extract(df, dtypes, perc_min_num=args['perc_min_num'], verbose=args['verbose'])
 
     # Make empty frames
     maxstring=50
@@ -147,11 +148,16 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
         out_onehot = out_onehot.loc[:, Iloc]
         labx = labx[Iloc]
 
+    if labels is None:
+        labels = df.columns.values
+
     out = {}
     out['numeric'] = out_numeric
     out['dtypes'] = dtypes
     out['onehot'] = out_onehot
     out['labx'] = labx
+    out['df'] = df
+    out['labels'] = labels
     return(out)
 
 
@@ -269,7 +275,7 @@ def _deep_extract(df, dtypes, perc_min_num=None, verbose=3):
     # Return
     if df.shape[1]!=len(dtypes): raise Exception('[df2onehot] >Error: size of dtypes and dataframe does not match.')
     if df.shape[1]!=len(labels): raise Exception('[df2onehot] >Error: size of dtypes and dataframe does not match.')
-    return(df, dtypes)
+    return(df, dtypes, labels)
 
 
 # %%

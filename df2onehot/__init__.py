@@ -3,7 +3,7 @@ from df2onehot.df2onehot import (
     import_example,
     )
 
-from df2onehot.set_dtypes import (
+from df2onehot.utils import (
  	set_dtypes,
  	is_DataFrame,
     set_y,
