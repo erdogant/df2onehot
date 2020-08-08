@@ -37,29 +37,31 @@ python -U setup.py install
 #### Import df2onehot package
 ```python
 import df2onehot
+# Example dataset
+df = df2onehot.import_example()
 ```
 
 #### Example:
 
 ```python
-df = df2onehot.import_example()
+from df2onehot import df2onehot
 # Convert
-out = df2onehot.df2onehot(df)
+out = df2onehot(df)
 ```
 
 ```python
 # Force features (int or float) to be numeric if unique non-zero values are above percentage.
-out = df2onehot.df2onehot(df, perc_min_num=0.8)
+out = df2onehot(df, perc_min_num=0.8)
 ```
 
 ```python
 # Remove categorical features for which less then 2 values exists.
-out = df2onehot.df2onehot(df, y_min=2)
+out = df2onehot(df, y_min=2)
 ```
 
 ```python
 # Combine two rules above.
-out = df2onehot.df2onehot(df, y_min=2, perc_min_num=0.8)
+out = df2onehot(df, y_min=2, perc_min_num=0.8)
 ```
 
 
