@@ -112,7 +112,7 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
 
             # Contains a single value or is bool
             if (len(np.unique(integer_encoded))<=1) or (str(df.dtypes[i])=='bool'):
-                out_onehot[df.columns[i]] = integer_encoded.astype('Bool')
+                out_onehot[df.columns[i]] = integer_encoded.astype('bool')
                 labx.append(df.columns[i])
             else:
                 # binary encode
@@ -128,7 +128,7 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
                     # Check whether this is a label that should be excluded.
                     if (isinstance(args['excl_background'], type(None))) or (not np.isin(label, args['excl_background'])):
                         colname = df.columns[i] + '_' + label
-                        out_onehot[colname] = onehot_encoded[:, k].astype('Bool')
+                        out_onehot[colname] = onehot_encoded[:, k].astype('bool')
                         labx.append(df.columns[i])
 
                 # Make numerical vector
