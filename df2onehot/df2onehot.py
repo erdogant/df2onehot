@@ -35,7 +35,7 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
     y_min : int [0..len(y)], optional
         Minimal number of sampels that must be present in a group. All groups with less then y_min samples are labeled as _other_ and are not used in the enriching model. The default is None.
     perc_min_num : float [None, 0..1], optional
-        Force column (int or float) to be numerical if unique non-zero values are above percentage. The default is None. Alternative can be 0.8
+        This parameters can be used to force variables into numeric ones if unique non-zero values are above the percentage. The default is None. Alternative can be 0.8
     hot_only : bool [True, False], optional
         When True; the output of the onehot matrix exclusively contains categorical values that are transformed to one-hot. The default is True.
     deep_extract : bool [False, True] (default : False)
