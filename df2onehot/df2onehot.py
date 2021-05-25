@@ -41,8 +41,9 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
     deep_extract : bool [False, True] (default : False)
         True: Extract information from a vector that contains a list/array/dict.
         False: converted to a string and treated as catagorical ['cat'].
-    excl_background : list or None, [0], [0, '0.0', 'male', ...], optional
-        Remove values/strings that labeled as background. As an example, in a two-class approach with [0,1], the 0 is usually the background and not of interest. The default is None.
+    excl_background : list or None, [0], [0, '0.0', 'unknown', 'nan', 'None' ...], optional
+        Remove values/strings that labeled in the list. As an example, the following column: ['yes', 'no', 'yes', 'yes','no','unknown', ...], is split into 'column_yes', 'column_no' and 'column_unknown'. If unknown listed, then 'column_unknown' is not transformed into a new one-hot column.
+        The default is None (every possible name is converted into a one-hot column)
     verbose : int, optional
         Print message to screen. The default is 3.
         0: (default), 1: ERROR, 2: WARN, 3: INFO, 4: DEBUG, 5: TRACE
@@ -53,11 +54,15 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
     numeric : DataFrame
         Input-dataframe with converted numerical values
     onehot : DataFrame
-        Input-dataframe with converted one-hot values. Note that continues values are removed.
+        Input-dataframe with converted one-hot values. Note that continuous values are only removed if hot_only=True.
     labx : list of str
         Input feature-labels or names
+    df : DataFrame
+        Input-dataframe but with set dtypes. Note that df is extended if deep_extract=True
+    labels : list of str
+        Column names of df
     dtypes : list of str
-        The set dtypes for the feature-labels. These can be of type 'num' (numerical) or 'cat' (categorical).
+        dtypes for the feature-labels for df in the form of 'num' (numerical) and/or 'cat' (categorical).
 
     Examples
     --------
