@@ -6,6 +6,7 @@
 [![Downloads](https://pepy.tech/badge/df2onehot/month)](https://pepy.tech/project/df2onehot/month)
 [![Downloads](https://pepy.tech/badge/df2onehot)](https://pepy.tech/project/df2onehot)
 [![BuyMeCoffee](https://img.shields.io/badge/buymea-coffee-yellow.svg)](https://www.buymeacoffee.com/erdogant)
+[![DOI](https://zenodo.org/badge/245003302.svg)](https://zenodo.org/badge/latestdoi/245003302)
 <!---[![Coffee](https://img.shields.io/badge/coffee-black-grey.svg)](https://erdogant.github.io/donate/?currency=USD&amount=5)-->
 
     Star it if you like it!
