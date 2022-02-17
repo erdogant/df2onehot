@@ -5,26 +5,18 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/erdogant/df2onehot/blob/master/LICENSE)
 [![Downloads](https://pepy.tech/badge/df2onehot/month)](https://pepy.tech/project/df2onehot/month)
 [![Downloads](https://pepy.tech/badge/df2onehot)](https://pepy.tech/project/df2onehot)
-[![BuyMeCoffee](https://img.shields.io/badge/buymea-coffee-yellow.svg)](https://www.buymeacoffee.com/erdogant)
 [![DOI](https://zenodo.org/badge/245003302.svg)](https://zenodo.org/badge/latestdoi/245003302)
+<!---[![BuyMeCoffee](https://img.shields.io/badge/buymea-coffee-yellow.svg)](https://www.buymeacoffee.com/erdogant)-->
 <!---[![Coffee](https://img.shields.io/badge/coffee-black-grey.svg)](https://erdogant.github.io/donate/?currency=USD&amount=5)-->
-
-    Star it if you like it!
 
 * df2onehot is Python package to convert your complex dataframe into a one-hot dense array.
 
-### Contents
-- [Installation](#-installation)
-- [Quick Start](#-quick-start)
-- [Contribute](#-contribute)
-- [Maintainers](#-maintainers)
-- [License](#-copyright)
+# 
+**Star this repo if you like it! ⭐️**
+#
 
 ### Installation
-* Install df2onehot from PyPI (recommended). df2onehot is compatible with Python 3.6+ and runs on Linux, MacOS X and Windows. 
-* It is distributed under the MIT license.
 
-#### Quick Start
 ```
 pip install df2onehot
 ```
