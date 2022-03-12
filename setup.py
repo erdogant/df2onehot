@@ -22,7 +22,7 @@ setuptools.setup(
      description="Python package df2onehot is to convert a pandas dataframe into a stuctured dataframe.",
      long_description=long_description,
      long_description_content_type="text/markdown",
-     url="https://github.com/erdogant/df2onehot",
+     url="https://erdogant.github.io/df2onehot",
 	 download_url = 'https://github.com/erdogant/df2onehot/archive/'+new_version+'.tar.gz',
      packages=setuptools.find_packages(), # Searches throughout all dirs for files to include
      include_package_data=True, # Must be true to include files depicted in MANIFEST.in

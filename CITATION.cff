@@ -10,9 +10,11 @@ date-released: 2020-10-07
 keywords: 
   - "python"
   - "unstructured-data"
+  - "data conversion"
+  - "data filtering"
 license: "MIT"
 message: "If you use this software, please cite it using these metadata."
-repository-code: "https://github.com/erdogant/df2onehot"
+repository-code: "https://erdogant.github.io/df2onehot"
 title: "Python package to convert a unstructured array into a stuctured dataframe."
 version: "0.2.17"
 ...
