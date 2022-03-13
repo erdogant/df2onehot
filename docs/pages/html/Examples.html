@@ -53,7 +53,12 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Process Mixed dataset</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Process Mixed dataset</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#force-categorical-values-into-numeric">Force categorical values into numeric</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#exclude-redundant-variables">Exclude redundant variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#exclude-sparse-variables">Exclude sparse variables</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="#custom-dtypes">Custom dtypes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="#extracting-deep-lists">Extracting deep lists</a></li>
 </ul>
@@ -146,6 +151,8 @@
 <span class="c1">#        [&#39;all_true&#39;, &#39;cat&#39;]], dtype=object)</span>
 </pre></div>
 </div>
+<section id="force-categorical-values-into-numeric">
+<h2>Force categorical values into numeric<a class="headerlink" href="#force-categorical-values-into-numeric" title="Permalink to this headline"></a></h2>
 <p>We can force variables to be numeric if the number of unique values are above the given percentage: 80%.
 Or in other words, if a variable contains more then 80% unique values, it is set as numerical.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set the parameter to force columns into numerical dtypes</span>
@@ -192,6 +199,9 @@ Or in other words, if a variable contains more then 80% unique values, it is set
 <span class="c1"># [891 rows x 206 columns]</span>
 </pre></div>
 </div>
+</section>
+<section id="exclude-redundant-variables">
+<h2>Exclude redundant variables<a class="headerlink" href="#exclude-redundant-variables" title="Permalink to this headline"></a></h2>
 <p>We can make further clean the data by removing mutually exclusive columns.
 As an example, the column <strong>Survived</strong> is split into <em>Survived_0.0</em> and <em>Survived_1.0</em> but the column <em>Survived_0.0</em> may not be so relevant. With the parameter <code class="docutils literal notranslate"><span class="pre">excl_background</span></code> we can ignore the labels that are put begin the columns.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Ignore specific subcategories</span>
@@ -203,18 +213,22 @@ As an example, the column <strong>Survived</strong> is split into <em>Survived_0
 
 <span class="c1"># The original variable names can be found here:</span>
 <span class="n">results</span><span class="p">[</span><span class="s1">&#39;labx&#39;</span><span class="p">]</span>
-
-<span class="c1"># We can tune the ``y_min`` parameter further remove even more columns.</span>
-<span class="n">results</span> <span class="o">=</span> <span class="n">df2onehot</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">perc_min_num</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">y_min</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">excl_background</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;0.0&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</section>
+<section id="exclude-sparse-variables">
+<h2>Exclude sparse variables<a class="headerlink" href="#exclude-sparse-variables" title="Permalink to this headline"></a></h2>
+<p>By converting categorical values into one-hot dense arrays, it can easily occur that certain variables will only contain a single or few <code class="docutils literal notranslate"><span class="pre">True</span></code> values. We can use the <code class="docutils literal notranslate"><span class="pre">y_min</span></code> functionality to remove such columns.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># We can tune the ``y_min`` parameter further remove even more columns.</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">df2onehot</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">perc_min_num</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">y_min</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">excl_background</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;0.0&#39;</span><span class="p">])</span>
 
 <span class="c1"># The final shape of our structured dataset is:</span>
 <span class="n">results</span><span class="p">[</span><span class="s1">&#39;onehot&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
 <span class="p">(</span><span class="mi">891</span><span class="p">,</span> <span class="mi">29</span><span class="p">)</span>
-
-<span class="c1"># This looks more like it!</span>
-<span class="c1"># We still need to manually remove the identifier column and then we are ready to go for analysis!</span>
 </pre></div>
 </div>
+<p>We still need to manually remove the identifier column and then we are ready to go for analysis!</p>
+</section>
 </section>
 <section id="custom-dtypes">
 <h1>Custom dtypes<a class="headerlink" href="#custom-dtypes" title="Permalink to this headline"></a></h1>
@@ -223,25 +237,10 @@ As an example, the column <strong>Survived</strong> is split into <em>Survived_0
 <span class="kn">from</span> <span class="nn">df2onehot</span> <span class="kn">import</span> <span class="n">df2onehot</span><span class="p">,</span> <span class="n">import_example</span>
 
 <span class="c1"># Import Fifa dataset</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">import_example</span><span class="p">(</span><span class="s1">&#39;fifa&#39;</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">import_example</span><span class="p">(</span><span class="s1">&#39;sprinkler&#39;</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
-<span class="c1">#    Date          Team  ... Own goals  Own goal Time</span>
-<span class="c1"># 0    14-06-2018        Russia  ...       NaN            NaN</span>
-<span class="c1"># 1    14-06-2018  Saudi Arabia  ...       NaN            NaN</span>
-<span class="c1"># 2    15-06-2018         Egypt  ...       NaN            NaN</span>
-<span class="c1"># 3    15-06-2018       Uruguay  ...       NaN            NaN</span>
-<span class="c1"># 4    15-06-2018       Morocco  ...       1.0           90.0</span>
-<span class="c1"># ..          ...           ...  ...       ...            ...</span>
-<span class="c1"># 123  11-07-2018       England  ...       NaN            NaN</span>
-<span class="c1"># 124  14-07-2018       Belgium  ...       NaN            NaN</span>
-<span class="c1"># 125  14-07-2018       England  ...       NaN            NaN</span>
-<span class="c1"># 126  15-07-2018        France  ...       1.0           18.0</span>
-<span class="c1"># 127  15-07-2018       Croatia  ...       NaN            NaN</span>
-<span class="c1">#</span>
-<span class="c1"># [128 rows x 27 columns]</span>
-
-<span class="n">xxx</span>
+<span class="c1"># Custom typing of the columns</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">df2onehot</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">dtypes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;cat&#39;</span><span class="p">,</span><span class="s1">&#39;cat&#39;</span><span class="p">,</span><span class="s1">&#39;cat&#39;</span><span class="p">,</span><span class="s1">&#39;cat&#39;</span><span class="p">],</span> <span class="n">excl_background</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;0.0&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 </section>

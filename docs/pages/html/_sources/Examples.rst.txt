@@ -57,6 +57,9 @@ In the following example we load the Titanic dataset, and use ``df2onehot`` to c
 	#        ['all_true', 'cat']], dtype=object)
 
 
+Force categorical values into numeric
+**************************************
+
 We can force variables to be numeric if the number of unique values are above the given percentage: 80%.
 Or in other words, if a variable contains more then 80% unique values, it is set as numerical.
 
@@ -105,6 +108,10 @@ Or in other words, if a variable contains more then 80% unique values, it is set
 	# 
 	# [891 rows x 206 columns]
 
+
+Exclude redundant variables 
+**************************************
+
 We can make further clean the data by removing mutually exclusive columns.
 As an example, the column **Survived** is split into *Survived_0.0* and *Survived_1.0* but the column *Survived_0.0* may not be so relevant. With the parameter ``excl_background`` we can ignore the labels that are put begin the columns.
 
@@ -120,15 +127,22 @@ As an example, the column **Survived** is split into *Survived_0.0* and *Survive
 	# The original variable names can be found here:
 	results['labx']
 
+Exclude sparse variables
+**************************************
+
+By converting categorical values into one-hot dense arrays, it can easily occur that certain variables will only contain a single or few ``True`` values. We can use the ``y_min`` functionality to remove such columns.
+
+
+.. code:: python
+
 	# We can tune the ``y_min`` parameter further remove even more columns.
-	results = df2onehot(df, perc_min_num=0.8, y_min=2, excl_background=['0.0'])
+	results = df2onehot(df, perc_min_num=0.8, y_min=5, excl_background=['0.0'])
 
 	# The final shape of our structured dataset is:
 	results['onehot'].shape
 	(891, 29)
 
-	# This looks more like it!
-	# We still need to manually remove the identifier column and then we are ready to go for analysis!
+We still need to manually remove the identifier column and then we are ready to go for analysis!
 
 
 Custom dtypes
@@ -143,25 +157,11 @@ In the following example we load the **fifa** dataset and structure the dataset.
 	from df2onehot import df2onehot, import_example
 
 	# Import Fifa dataset
-	df = import_example('fifa')
+	df = import_example('sprinkler')
 
-	print(df)
-        #    Date          Team  ... Own goals  Own goal Time
-	# 0    14-06-2018        Russia  ...       NaN            NaN
-	# 1    14-06-2018  Saudi Arabia  ...       NaN            NaN
-	# 2    15-06-2018         Egypt  ...       NaN            NaN
-	# 3    15-06-2018       Uruguay  ...       NaN            NaN
-	# 4    15-06-2018       Morocco  ...       1.0           90.0
-	# ..          ...           ...  ...       ...            ...
-	# 123  11-07-2018       England  ...       NaN            NaN
-	# 124  14-07-2018       Belgium  ...       NaN            NaN
-	# 125  14-07-2018       England  ...       NaN            NaN
-	# 126  15-07-2018        France  ...       1.0           18.0
-	# 127  15-07-2018       Croatia  ...       NaN            NaN
-	# 
-	# [128 rows x 27 columns]
+	# Custom typing of the columns
+	results = df2onehot(df, dtypes=['cat','cat','cat','cat'], excl_background=['0.0'])
 
-	xxx
 
 
 Extracting deep lists
