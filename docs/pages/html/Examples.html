@@ -31,7 +31,7 @@
             <a href="index.html" class="icon icon-home"> df2onehot
           </a>
               <div class="version">
-                1.0.0
+                1.0.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -60,7 +60,11 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="#custom-dtypes">Custom dtypes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#extracting-deep-lists">Extracting deep lists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#extracting-nested-columns">Extracting nested columns</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#without-deep-extract">Without deep extract</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#with-deep-extract">With deep extract</a></li>
+</ul>
+</li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
 <ul>
@@ -244,8 +248,11 @@ As an example, the column <strong>Survived</strong> is split into <em>Survived_0
 </pre></div>
 </div>
 </section>
-<section id="extracting-deep-lists">
-<h1>Extracting deep lists<a class="headerlink" href="#extracting-deep-lists" title="Permalink to this headline"></a></h1>
+<section id="extracting-nested-columns">
+<h1>Extracting nested columns<a class="headerlink" href="#extracting-nested-columns" title="Permalink to this headline"></a></h1>
+<p>In certain cases, it can occur that your columns are nested with lists and dictionaries.
+With the <code class="docutils literal notranslate"><span class="pre">deep_extract</span></code> functionality it is possible to easily structure such columns.
+Let’s compare the results with and without the <code class="docutils literal notranslate"><span class="pre">deep_extract</span></code> functionality.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load library</span>
 <span class="kn">from</span> <span class="nn">df2onehot</span> <span class="kn">import</span> <span class="n">df2onehot</span><span class="p">,</span> <span class="n">import_example</span>
 
@@ -281,10 +288,13 @@ As an example, the column <strong>Survived</strong> is split into <em>Survived_0
 <span class="c1"># 24           NaN      NaN</span>
 </pre></div>
 </div>
-<p>Convert to onehot dense-array without using the <code class="docutils literal notranslate"><span class="pre">deep_extract</span></code> function.</p>
+<section id="without-deep-extract">
+<h2>Without deep extract<a class="headerlink" href="#without-deep-extract" title="Permalink to this headline"></a></h2>
+<p>Convert to onehot dense-array <strong>without</strong> using the <code class="docutils literal notranslate"><span class="pre">deep_extract</span></code> function.
+The result is a dataframe where each nested element is used as a new column name.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">df2onehot</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">deep_extract</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-<span class="c1"># With ``deep_extract=False`` we the full element value is used as a new column name.</span>
+<span class="c1"># print</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;onehot&#39;</span><span class="p">])</span>
 
 <span class="c1">#     feat_1_1  feat_1_10  ...  feat_2_None  feat_2_[&#39;4&#39;, &#39;45&#39;]</span>
@@ -301,7 +311,10 @@ As an example, the column <strong>Survived</strong> is split into <em>Survived_0
 <span class="c1"># [25 rows x 10 columns]</span>
 </pre></div>
 </div>
-<p>With <code class="docutils literal notranslate"><span class="pre">deep_extract=False</span></code>, each element is analyzed whether it contains lists or dictionaries and each element value has become a new column. If a column name already exists, the value is added to that row.</p>
+</section>
+<section id="with-deep-extract">
+<h2>With deep extract<a class="headerlink" href="#with-deep-extract" title="Permalink to this headline"></a></h2>
+<p>With <code class="docutils literal notranslate"><span class="pre">deep_extract=True</span></code>, each element is analyzed whether it contains lists or dictionaries and structured accordingly. If a column name already exists, the value is added into that column for the specific row.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Convert to onehot dense-array with the ``deep_extract=True`` function</span>
 <span class="n">results</span> <span class="o">=</span> <span class="n">df2onehot</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">deep_extract</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -338,6 +351,7 @@ As an example, the column <strong>Survived</strong> is split into <em>Survived_0
         <script async type="text/javascript" src="//cdn.carbonads.com/carbon.js?serve=CEADP27U&placement=erdogantgithubio" id="_carbonads_js"></script>
 </center>
 <hr></section>
+</section>
 
 
            </div>

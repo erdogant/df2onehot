@@ -164,8 +164,12 @@ In the following example we load the **fifa** dataset and structure the dataset.
 
 
 
-Extracting deep lists
+Extracting nested columns
 ####################################
+
+In certain cases, it can occur that your columns are nested with lists and dictionaries.
+With the ``deep_extract`` functionality it is possible to easily structure such columns.
+Let's compare the results with and without the ``deep_extract`` functionality.
 
 .. code:: python
 
@@ -204,13 +208,17 @@ Extracting deep lists
 	# 24           NaN      NaN
 
 
-Convert to onehot dense-array without using the ``deep_extract`` function.
+Without deep extract
+*********************
+
+Convert to onehot dense-array **without** using the ``deep_extract`` function.
+The result is a dataframe where each nested element is used as a new column name.
 
 .. code:: python
 
 	results = df2onehot(df, deep_extract=False)
 	
-	# With ``deep_extract=False`` we the full element value is used as a new column name.
+	# print
 	print(results['onehot'])
 
 	#     feat_1_1  feat_1_10  ...  feat_2_None  feat_2_['4', '45']
@@ -227,7 +235,10 @@ Convert to onehot dense-array without using the ``deep_extract`` function.
 	# [25 rows x 10 columns]
 
 
-With ``deep_extract=False``, each element is analyzed whether it contains lists or dictionaries and each element value has become a new column. If a column name already exists, the value is added to that row.
+With deep extract
+*********************
+
+With ``deep_extract=True``, each element is analyzed whether it contains lists or dictionaries and structured accordingly. If a column name already exists, the value is added into that column for the specific row.
 
 .. code:: python
 
