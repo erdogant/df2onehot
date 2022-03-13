@@ -8,8 +8,8 @@
 # ----------------------------------------------------
 
 # %% Libraries
+import warnings
 import wget
-import sys
 import os
 from tqdm import tqdm
 import numpy as np
@@ -20,7 +20,7 @@ from df2onehot.utils import set_dtypes
 # from set_dtypes import set_dtypes
 label_encoder = LabelEncoder()
 onehot_encoder = OneHotEncoder(sparse=False, categories='auto')
-
+warnings.filterwarnings('ignore')
 
 # %% Dataframe to one-hot
 def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True, deep_extract=False, excl_background=None, verbose=3):
@@ -82,6 +82,7 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
     disable = (True if (verbose==0 or verbose>3) else False)
 
     # Reset index
+    df = df.copy()
     df.reset_index(drop=True, inplace=True)
     # Determine Dtypes
     df, dtypes = set_dtypes(df, args['dtypes'], deep_extract=args['deep_extract'], perc_min_num=args['perc_min_num'], verbose=args['verbose'])
@@ -416,7 +417,7 @@ def import_example(data='titanic', url=None, sep=',', verbose=3):
     Parameters
     ----------
     data : str
-        Name of datasets: 'sprinkler', 'titanic', 'student', 'fifa', 'cancer', 'waterpump', 'retail'
+        Name of datasets: 'sprinkler', 'titanic', 'student', 'fifa', 'cancer', 'waterpump'
     url : str
         url link to to dataset.
     verbose : int, (default: 3)
@@ -441,8 +442,21 @@ def import_example(data='titanic', url=None, sep=',', verbose=3):
             url='https://erdogant.github.io/datasets/FIFA_2018.zip'
         elif data=='waterpump':
             url='https://erdogant.github.io/datasets/waterpump/waterpump_test.zip'
-        elif data=='retail':
-            url='https://erdogant.github.io/datasets/marketing_data_online_retail_small.zip'
+        elif data=='complex':
+            df = pd.DataFrame(index=np.arange(0, 25))
+            df['feat_1'] = np.nan
+            df['feat_1'].iloc[0] = ['3', 4]
+            df['feat_1'].iloc[2] = ['5', '6', '7', '8']
+            df['feat_1'].iloc[20] = ['9', '11', '4']
+            df['feat_1'].iloc[5] = 10
+            df['feat_1'].iloc[15] = 1
+            df['feat_2'] = np.nan
+            df['feat_2'].iloc[0] = ['4', '45']
+            df['feat_2'].iloc[15] = 1
+            df['feat_2'].iloc[20] = 10
+            return df
+        # elif data=='retail':
+            # url='https://erdogant.github.io/datasets/marketing_data_online_retail_small.zip'
     else:
         data = wget.filename_from_url(url)
 
