@@ -8,7 +8,7 @@ import unittest
 class Testdf2onehot(unittest.TestCase):
 
 	def test_df2onehot(self):
-		df = import_example()
+		df = import_example(data='titanic')
 		df['all_true']=1
 		# TEST 1: check output is unchanged
 		out = df2onehot(df)
@@ -22,33 +22,38 @@ class Testdf2onehot(unittest.TestCase):
 		# TEST WHETHER SIZE MATCHES
 		assert out['numeric'].shape[1]==len(out['dtypes'])
 
-		df = import_example()
 
 		# TEST 3:
+		df = import_example(data='titanic')
 		out = df2onehot(df, deep_extract=False, perc_min_num=0.8)
 		[uiy, ycounts] = np.unique(out['labx'], return_counts=True)
-		assert np.all(ycounts==np.array([148,   4, 891,   7, 891,   3,   2,   7,   2, 681,   1]))
+		assert np.all(ycounts==np.array([148,   4, 891,   7,   3,   2,   7,   2, 681]))
+
 		# TEST 4:
 		out = df2onehot(df, y_min=2)
 		[uiy, ycounts] = np.unique(out['labx'], return_counts=True)
 		assert np.all(ycounts==np.array([ 47,   4,   6,   3,   2,   7,   2, 134]))
+
 		# TEST 4:
 		out = df2onehot(df, y_min=0)
 		assert np.all(out['onehot'].sum(axis=0)>=0)
+
 		# TEST 4:
 		out = df2onehot(df, y_min=1)
 		assert np.all(out['onehot'].sum(axis=0)>=1)
+
 		# TEST 4:
 		out = df2onehot(df, y_min=10)
 		assert np.all(out['onehot'].sum(axis=0)>=10)
 		out = df2onehot(df, y_min=100)
 		assert np.all(out['onehot'].sum(axis=0)>=100)
+
 		# TEST 4:
 		out = df2onehot(df, y_min=2, excl_background=['male'])
 		assert out['onehot'].shape[1]==204
 
 		# TEST ARRAYS:
-		df = import_example()
+		df = import_example(data='titanic')
 		colnames = np.array(['3','4','5','6','7','8','9','11'])
 		df['lists'] = np.nan
 		df['lists'].iloc[0] = colnames[[0,1]]
@@ -68,7 +73,7 @@ class Testdf2onehot(unittest.TestCase):
 				assert np.all(np.sort(df['lists'].iloc[i])==np.sort(colnames[idx]))
 		
 		# TEST lists:
-		df = import_example()
+		df = import_example(data='titanic')
 		colnames = np.array(['3','4','5','6','7','8','9','11'])
 		df['lists'] = np.nan
 		df['lists'].iloc[0] = ['3','4']
