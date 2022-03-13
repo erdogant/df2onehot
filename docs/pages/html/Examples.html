@@ -144,10 +144,11 @@
 <span class="c1">#        [&#39;Cabin&#39;, &#39;cat&#39;],</span>
 <span class="c1">#        [&#39;Embarked&#39;, &#39;cat&#39;],</span>
 <span class="c1">#        [&#39;all_true&#39;, &#39;cat&#39;]], dtype=object)</span>
-
-
-<span class="c1"># Force variables to be numeric if the number of unique values are above the given percentage: 80%.</span>
-<span class="c1"># Or in other words, if a variable contains more then 80% unique values, it is set as numerical.</span>
+</pre></div>
+</div>
+<p>We can force variables to be numeric if the number of unique values are above the given percentage: 80%.
+Or in other words, if a variable contains more then 80% unique values, it is set as numerical.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set the parameter to force columns into numerical dtypes</span>
 <span class="n">results</span> <span class="o">=</span> <span class="n">df2onehot</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">perc_min_num</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
 
 <span class="c1"># Also remove categorical features for which less then 2 values exists.</span>
@@ -173,9 +174,6 @@
 <span class="c1">#  [&#39;all_true&#39; &#39;cat&#39;]]</span>
 
 <span class="c1"># If we look at our one hot dense array, we notice that behind each column the sub-category is added.</span>
-<span class="c1"># The column **Survived** is also split into but the True and False column are mutually exclusive.</span>
-<span class="c1"># With the parameter ``excl_background`` we can ignore the labels that are put begin the columns.</span>
-
 <span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;onehot&#39;</span><span class="p">])</span>
 
 <span class="c1">#      Survived_0.0  Survived_1.0  Pclass_1.0  ...  Embarked_Q  Embarked_S  all_true</span>
@@ -192,8 +190,11 @@
 <span class="c1"># 890          True         False       False  ...        True       False      True</span>
 <span class="c1">#</span>
 <span class="c1"># [891 rows x 206 columns]</span>
-
-<span class="c1"># Ignore specific subcategories</span>
+</pre></div>
+</div>
+<p>We can make further clean the data by removing mutually exclusive columns.
+As an example, the column <strong>Survived</strong> is split into <em>Survived_0.0</em> and <em>Survived_1.0</em> but the column <em>Survived_0.0</em> may not be so relevant. With the parameter <code class="docutils literal notranslate"><span class="pre">excl_background</span></code> we can ignore the labels that are put begin the columns.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Ignore specific subcategories</span>
 <span class="n">results</span> <span class="o">=</span> <span class="n">df2onehot</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">perc_min_num</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">y_min</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">excl_background</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;0.0&#39;</span><span class="p">])</span>
 
 <span class="c1"># The final shape of our structured dataset is:</span>
@@ -279,12 +280,14 @@
 <span class="c1"># 22           NaN      NaN</span>
 <span class="c1"># 23           NaN      NaN</span>
 <span class="c1"># 24           NaN      NaN</span>
-
-<span class="c1"># Convert to onehot dense-array without using the ``deep_extract`` function</span>
-<span class="n">results</span> <span class="o">=</span> <span class="n">df2onehot</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">deep_extract</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Convert to onehot dense-array without using the <code class="docutils literal notranslate"><span class="pre">deep_extract</span></code> function.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">df2onehot</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">deep_extract</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 <span class="c1"># With ``deep_extract=False`` we the full element value is used as a new column name.</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;onehot&#39;</span><span class="p">])</span>
+
 <span class="c1">#     feat_1_1  feat_1_10  ...  feat_2_None  feat_2_[&#39;4&#39;, &#39;45&#39;]</span>
 <span class="c1"># 0      False      False  ...        False                True</span>
 <span class="c1"># 1      False      False  ...         True               False</span>
@@ -297,12 +300,13 @@
 <span class="c1"># 8      False      False  ...         True               False</span>
 <span class="c1"># ...</span>
 <span class="c1"># [25 rows x 10 columns]</span>
-
-
-<span class="c1"># Convert to onehot dense-array with the ``deep_extract=True`` function</span>
+</pre></div>
+</div>
+<p>With <code class="docutils literal notranslate"><span class="pre">deep_extract=False</span></code>, each element is analyzed whether it contains lists or dictionaries and each element value has become a new column. If a column name already exists, the value is added to that row.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Convert to onehot dense-array with the ``deep_extract=True`` function</span>
 <span class="n">results</span> <span class="o">=</span> <span class="n">df2onehot</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">deep_extract</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<span class="c1"># With ``deep_extract=False``, each element is analyzed whether it contains lists or dictionaries and each element value has become a new column. If a column name already exists, the value is added to that row.</span>
+<span class="c1"># print</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;onehot&#39;</span><span class="p">])</span>
 
 <span class="c1">#       1     10     11      3      4      5      6      7      8      9     45</span>

@@ -57,8 +57,12 @@ In the following example we load the Titanic dataset, and use ``df2onehot`` to c
 	#        ['all_true', 'cat']], dtype=object)
 
 
-	# Force variables to be numeric if the number of unique values are above the given percentage: 80%.
-	# Or in other words, if a variable contains more then 80% unique values, it is set as numerical.
+We can force variables to be numeric if the number of unique values are above the given percentage: 80%.
+Or in other words, if a variable contains more then 80% unique values, it is set as numerical.
+
+.. code:: python
+	
+	# Set the parameter to force columns into numerical dtypes
 	results = df2onehot(df, perc_min_num=0.8)
 
 	# Also remove categorical features for which less then 2 values exists.
@@ -84,9 +88,6 @@ In the following example we load the Titanic dataset, and use ``df2onehot`` to c
 	#  ['all_true' 'cat']]
 
 	# If we look at our one hot dense array, we notice that behind each column the sub-category is added.
-	# The column **Survived** is also split into but the True and False column are mutually exclusive.
-	# With the parameter ``excl_background`` we can ignore the labels that are put begin the columns.
-
 	print(results['onehot'])
 	
 	#      Survived_0.0  Survived_1.0  Pclass_1.0  ...  Embarked_Q  Embarked_S  all_true
@@ -103,6 +104,11 @@ In the following example we load the Titanic dataset, and use ``df2onehot`` to c
 	# 890          True         False       False  ...        True       False      True
 	# 
 	# [891 rows x 206 columns]
+
+We can make further clean the data by removing mutually exclusive columns.
+As an example, the column **Survived** is split into *Survived_0.0* and *Survived_1.0* but the column *Survived_0.0* may not be so relevant. With the parameter ``excl_background`` we can ignore the labels that are put begin the columns.
+
+.. code:: python
 
 	# Ignore specific subcategories
 	results = df2onehot(df, perc_min_num=0.8, y_min=2, excl_background=['0.0'])
@@ -196,12 +202,17 @@ Extracting deep lists
 	# 22           NaN      NaN
 	# 23           NaN      NaN
 	# 24           NaN      NaN
-	
-	# Convert to onehot dense-array without using the ``deep_extract`` function
+
+
+Convert to onehot dense-array without using the ``deep_extract`` function.
+
+.. code:: python
+
 	results = df2onehot(df, deep_extract=False)
 	
 	# With ``deep_extract=False`` we the full element value is used as a new column name.
 	print(results['onehot'])
+
 	#     feat_1_1  feat_1_10  ...  feat_2_None  feat_2_['4', '45']
 	# 0      False      False  ...        False                True
 	# 1      False      False  ...         True               False
@@ -216,10 +227,14 @@ Extracting deep lists
 	# [25 rows x 10 columns]
 
 
+With ``deep_extract=False``, each element is analyzed whether it contains lists or dictionaries and each element value has become a new column. If a column name already exists, the value is added to that row.
+
+.. code:: python
+
 	# Convert to onehot dense-array with the ``deep_extract=True`` function
 	results = df2onehot(df, deep_extract=True)
 	
-	# With ``deep_extract=False``, each element is analyzed whether it contains lists or dictionaries and each element value has become a new column. If a column name already exists, the value is added to that row.
+	# print
 	print(results['onehot'])
 
 	#	1     10     11      3      4      5      6      7      8      9     45
