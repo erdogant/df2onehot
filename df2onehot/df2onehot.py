@@ -447,7 +447,7 @@ def import_example(data='titanic', url=None, sep=',', verbose=3):
         data = wget.filename_from_url(url)
 
     if url is None:
-        if verbose>=3: print('[hnet] >Nothing to download.')
+        if verbose>=3: print('[df2onehot] >Nothing to download.')
         return None
 
     curpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
@@ -457,11 +457,11 @@ def import_example(data='titanic', url=None, sep=',', verbose=3):
 
     # Check file exists.
     if not os.path.isfile(PATH_TO_DATA):
-        if verbose>=3: print('[hnet] >Downloading [%s] dataset from github source..' %(data))
+        if verbose>=3: print('[df2onehot] >Downloading [%s] dataset from github source..' %(data))
         wget.download(url, curpath)
 
     # Import local dataset
-    if verbose>=3: print('[hnet] >Import dataset [%s]' %(data))
+    if verbose>=3: print('[df2onehot] >Import dataset [%s]' %(data))
     df = pd.read_csv(PATH_TO_DATA, sep=sep)
     # Return
     return df

@@ -9,7 +9,7 @@
 <!---[![BuyMeCoffee](https://img.shields.io/badge/buymea-coffee-yellow.svg)](https://www.buymeacoffee.com/erdogant)-->
 <!---[![Coffee](https://img.shields.io/badge/coffee-black-grey.svg)](https://erdogant.github.io/donate/?currency=USD&amount=5)-->
 
-* df2onehot is Python package to convert your complex dataframe into a one-hot dense array.
+``df2onehot`` is a Python package to convert unstructured DataFrames into structured dataframes, such as one-hot dense arrays.
 
 # 
 **Star this repo if you like it! ⭐️**

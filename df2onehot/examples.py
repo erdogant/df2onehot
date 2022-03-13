@@ -54,6 +54,7 @@ out['numeric'][colnames]
 
 
 # %% Load example
+import df2onehot
 df = df2onehot.import_example()
 
 
