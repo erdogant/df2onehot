@@ -12,7 +12,8 @@ class Testdf2onehot(unittest.TestCase):
 		df['all_true']=1
 		# TEST 1: check output is unchanged
 		out = df2onehot(df)
-		assert [*out.keys()]==['numeric','dtypes','onehot','labx']
+		assert [*out.keys()]==['numeric', 'dtypes', 'onehot', 'labx', 'df', 'labels']
+
 		# TEST 2: Check model output is unchanged
 		[uiy, ycounts] = np.unique(out['labx'], return_counts=True)
 		assert np.all(ycounts==np.array([148,   4, 891,   7, 891,   3,   2,   7,   2, 681, 1]))
@@ -26,7 +27,7 @@ class Testdf2onehot(unittest.TestCase):
 		# TEST 3:
 		out = df2onehot(df, deep_extract=False, perc_min_num=0.8)
 		[uiy, ycounts] = np.unique(out['labx'], return_counts=True)
-		assert np.all(ycounts==np.array([148,   4, 891,   7,   3,   2,   7,   2, 681]))
+		assert np.all(ycounts==np.array([148,   4, 891,   7, 891,   3,   2,   7,   2, 681,   1]))
 		# TEST 4:
 		out = df2onehot(df, y_min=2)
 		[uiy, ycounts] = np.unique(out['labx'], return_counts=True)
@@ -90,8 +91,7 @@ class Testdf2onehot(unittest.TestCase):
 				
 		# TEST 1: check output is unchanged
 		out = df2onehot(df)
-		assert [*out.keys()]==['numeric','dtypes','onehot','labx']
-
+		assert [*out.keys()]==['numeric', 'dtypes', 'onehot', 'labx', 'df', 'labels']
 
 		ymins = [0,1,10,100]
 		k=[5,10,100]
