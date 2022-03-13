@@ -6,41 +6,40 @@
 [![Downloads](https://pepy.tech/badge/df2onehot/month)](https://pepy.tech/project/df2onehot/month)
 [![Downloads](https://pepy.tech/badge/df2onehot)](https://pepy.tech/project/df2onehot)
 [![DOI](https://zenodo.org/badge/245003302.svg)](https://zenodo.org/badge/latestdoi/245003302)
+[![Sphinx](https://img.shields.io/badge/Sphinx-Docs-Green)](https://erdogant.github.io/df2onehot/)
 <!---[![BuyMeCoffee](https://img.shields.io/badge/buymea-coffee-yellow.svg)](https://www.buymeacoffee.com/erdogant)-->
 <!---[![Coffee](https://img.shields.io/badge/coffee-black-grey.svg)](https://erdogant.github.io/donate/?currency=USD&amount=5)-->
 
 ``df2onehot`` is a Python package to convert unstructured DataFrames into structured dataframes, such as one-hot dense arrays.
 
 # 
-**Star this repo if you like it! ⭐️**
+**⭐️ Star this repo if you like it ⭐️**
 #
 
-### Installation
+#### Install df2onehot from PyPI
 
-```
+```bash
 pip install df2onehot
 ```
 
-* Alternatively, install df2onehot from the GitHub source:
-```bash
-git clone https://github.com/erdogant/df2onehot.git
-cd df2onehot
-python -U setup.py install
-```  
-
 #### Import df2onehot package
-```python
-import df2onehot
-# Example dataset
-df = df2onehot.import_example()
-```
-
-#### Example:
 
 ```python
 from df2onehot import df2onehot
-# Convert
-out = df2onehot(df)
+```
+# 
+
+
+### [Documentation pages](https://erdogant.github.io/df2onehot/)
+
+On the [documentation pages](https://erdogant.github.io/df2onehot/) you can find detailed information about the working of the ``df2onehot`` with many examples. 
+
+<hr> 
+
+### Examples
+
+```python
+results = df2onehot(df)
 ```
 
 ```python
@@ -58,6 +57,16 @@ out = df2onehot(df, y_min=2)
 out = df2onehot(df, y_min=2, perc_min_num=0.8)
 ```
 
+
+# 
+* [Example: Process Mixed dataset](https://erdogant.github.io/df2onehot/pages/html/Examples.html#)
+# 
+* [Example: Extracting nested columns](https://erdogant.github.io/df2onehot/pages/html/Examples.html#extracting-nested-columns)
+# 
+* [Example: Setting custom dtypes](https://erdogant.github.io/df2onehot/pages/html/Examples.html#custom-dtypes)
+#
+
+<hr>
 
 #### Maintainers
 * Erdogan Taskesen, github: [erdogant](https://github.com/erdogant)
