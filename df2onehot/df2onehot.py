@@ -129,7 +129,7 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
                 # Make new one-hot columns
                 for k in range(0, onehot_encoded.shape[1]):
                     # Get the colname based on the value in the orignal dataframe
-                    label = df.iloc[onehot_encoded[:,k]==1, i].unique().astype(str)[0]
+                    label = df.iloc[onehot_encoded[:, k]==1, i].unique().astype(str)[0]
 
                     # Check whether this is a label that should be excluded.
                     if (isinstance(args['excl_background'], type(None))) or (not np.isin(label, args['excl_background'])):
