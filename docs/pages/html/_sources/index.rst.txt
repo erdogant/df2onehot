@@ -6,7 +6,7 @@ df2onehot's documentation!
 
 You contribution is important
 ==============================
-If you ❤️ this project, **star** this repo at the `github page <https://github.com/erdogant/df2onehot/>`_ and have a look at the `sponser page <https://github.com/erdogant/df2onehot/pages/html/Documentation.html>`_!
+If you ❤️ this project, **star** this repo at the `github page <https://github.com/erdogant/df2onehot/>`_ and have a look at the `sponser page <https://erdogant.github.io/df2onehot/pages/html/Documentation.html>`_!
 
 
 Github
