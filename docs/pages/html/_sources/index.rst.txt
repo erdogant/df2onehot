@@ -4,9 +4,9 @@ df2onehot's documentation!
 ``df2onehot`` is a Python package to convert unstructured DataFrames into structured dataframes, such as one-hot dense arrays.
 
 
-Star is important
-======================
-If you ❤️ this project, **star** this repo at the `github page <https://github.com/erdogant/df2onehot/>`_!
+You contribution is important
+==============================
+If you ❤️ this project, **star** this repo at the `github page <https://github.com/erdogant/df2onehot/>`_ and have a look at the `sponser page <https://github.com/erdogant/df2onehot/pages/html/Documentation.html>`_!
 
 
 Github
