@@ -1,3 +1,5 @@
+.. include:: add_top.add
+
 Process Mixed dataset
 ####################################
 
@@ -273,10 +275,6 @@ With ``deep_extract=True``, each element is analyzed whether it contains lists o
 	# 20  False   True   True  False   True  False  False  False  False   True  False
 
 
-.. raw:: html
 
-	<hr>
-	<center>
-		<script async type="text/javascript" src="//cdn.carbonads.com/carbon.js?serve=CEADP27U&placement=erdogantgithubio" id="_carbonads_js"></script>
-	</center>
-	<hr>
+
+.. include:: add_bottom.add

@@ -1,5 +1,4 @@
-API References
-------------------------------------------------
+.. include:: add_top.add
 
 
 .. automodule:: df2onehot.df2onehot
@@ -13,3 +12,6 @@ API References
 		<script async type="text/javascript" src="//cdn.carbonads.com/carbon.js?serve=CEADP27U&placement=erdogantgithubio" id="_carbonads_js"></script>
 	</center>
 	<hr>
+
+
+.. include:: add_bottom.add

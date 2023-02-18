@@ -15,6 +15,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -31,7 +32,7 @@
             <a href="index.html" class="icon icon-home"> df2onehot
           </a>
               <div class="version">
-                1.0.1
+                1.0.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -72,7 +73,6 @@
 <li class="toctree-l1"><a class="reference internal" href="Documentation.html#github">Github</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Documentation.html#citing">Citing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Coding%20quality.html">Coding quality</a></li>
-<li class="toctree-l1"><a class="reference internal" href="df2onehot.df2onehot.html">API References</a></li>
 </ul>
 
     <a href= "genindex.html">Index</a>
@@ -101,8 +101,15 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="process-mixed-dataset">
-<h1>Process Mixed dataset<a class="headerlink" href="#process-mixed-dataset" title="Permalink to this headline"></a></h1>
+  <hr>
+<center>
+        <script async src="https://media.ethicalads.io/media/client/ethicalads.min.js"></script>
+        <!-- Show an image ad -->
+        <!-- <div data-ea-publisher="erdogantgithubio" data-ea-type="image"></div> -->
+        <div data-ea-publisher="erdogantgithubio" data-ea-type="text"></div>
+</center>
+<hr><section id="process-mixed-dataset">
+<h1>Process Mixed dataset<a class="headerlink" href="#process-mixed-dataset" title="Permalink to this heading"></a></h1>
 <p>In the following example we load the Titanic dataset, and use <code class="docutils literal notranslate"><span class="pre">df2onehot</span></code> to convert it towards a structured dataset.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load library</span>
 <span class="kn">from</span> <span class="nn">df2onehot</span> <span class="kn">import</span> <span class="n">df2onehot</span><span class="p">,</span> <span class="n">import_example</span>
@@ -157,7 +164,7 @@
 </pre></div>
 </div>
 <section id="force-categorical-values-into-numeric">
-<h2>Force categorical values into numeric<a class="headerlink" href="#force-categorical-values-into-numeric" title="Permalink to this headline"></a></h2>
+<h2>Force categorical values into numeric<a class="headerlink" href="#force-categorical-values-into-numeric" title="Permalink to this heading"></a></h2>
 <p>We can force variables to be numeric if the number of unique values are above the given percentage: 80%.
 Or in other words, if a variable contains more then 80% unique values, it is set as numerical.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set the parameter to force columns into numerical dtypes</span>
@@ -206,7 +213,7 @@ Or in other words, if a variable contains more then 80% unique values, it is set
 </div>
 </section>
 <section id="exclude-redundant-variables">
-<h2>Exclude redundant variables<a class="headerlink" href="#exclude-redundant-variables" title="Permalink to this headline"></a></h2>
+<h2>Exclude redundant variables<a class="headerlink" href="#exclude-redundant-variables" title="Permalink to this heading"></a></h2>
 <p>We can make further clean the data by removing mutually exclusive columns.
 As an example, the column <strong>Survived</strong> is split into <em>Survived_0.0</em> and <em>Survived_1.0</em> but the column <em>Survived_0.0</em> may not be so relevant. With the parameter <code class="docutils literal notranslate"><span class="pre">excl_background</span></code> we can ignore the labels that are put begin the columns.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Ignore specific subcategories</span>
@@ -222,7 +229,7 @@ As an example, the column <strong>Survived</strong> is split into <em>Survived_0
 </div>
 </section>
 <section id="exclude-sparse-variables">
-<h2>Exclude sparse variables<a class="headerlink" href="#exclude-sparse-variables" title="Permalink to this headline"></a></h2>
+<h2>Exclude sparse variables<a class="headerlink" href="#exclude-sparse-variables" title="Permalink to this heading"></a></h2>
 <p>By converting categorical values into one-hot dense arrays, it can easily occur that certain variables will only contain a single or few <code class="docutils literal notranslate"><span class="pre">True</span></code> values. We can use the <code class="docutils literal notranslate"><span class="pre">y_min</span></code> functionality to remove such columns.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># We can tune the ``y_min`` parameter further remove even more columns.</span>
 <span class="n">results</span> <span class="o">=</span> <span class="n">df2onehot</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">perc_min_num</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">y_min</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">excl_background</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;0.0&#39;</span><span class="p">])</span>
@@ -236,7 +243,7 @@ As an example, the column <strong>Survived</strong> is split into <em>Survived_0
 </section>
 </section>
 <section id="custom-dtypes">
-<h1>Custom dtypes<a class="headerlink" href="#custom-dtypes" title="Permalink to this headline"></a></h1>
+<h1>Custom dtypes<a class="headerlink" href="#custom-dtypes" title="Permalink to this heading"></a></h1>
 <p>In the following example we load the <strong>fifa</strong> dataset and structure the dataset.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load library</span>
 <span class="kn">from</span> <span class="nn">df2onehot</span> <span class="kn">import</span> <span class="n">df2onehot</span><span class="p">,</span> <span class="n">import_example</span>
@@ -250,7 +257,7 @@ As an example, the column <strong>Survived</strong> is split into <em>Survived_0
 </div>
 </section>
 <section id="extracting-nested-columns">
-<h1>Extracting nested columns<a class="headerlink" href="#extracting-nested-columns" title="Permalink to this headline"></a></h1>
+<h1>Extracting nested columns<a class="headerlink" href="#extracting-nested-columns" title="Permalink to this heading"></a></h1>
 <p>In certain cases, it can occur that your columns are nested with lists and dictionaries.
 With the <code class="docutils literal notranslate"><span class="pre">deep_extract</span></code> functionality it is possible to easily structure such columns.
 Let’s compare the results with and without the <code class="docutils literal notranslate"><span class="pre">deep_extract</span></code> functionality.</p>
@@ -290,7 +297,7 @@ Let’s compare the results with and without the <code class="docutils literal n
 </pre></div>
 </div>
 <section id="without-deep-extract">
-<h2>Without deep extract<a class="headerlink" href="#without-deep-extract" title="Permalink to this headline"></a></h2>
+<h2>Without deep extract<a class="headerlink" href="#without-deep-extract" title="Permalink to this heading"></a></h2>
 <p>Convert to onehot dense-array <strong>without</strong> using the <code class="docutils literal notranslate"><span class="pre">deep_extract</span></code> function.
 The result is a dataframe where each nested element is used as a new column name.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">df2onehot</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">deep_extract</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -314,7 +321,7 @@ The result is a dataframe where each nested element is used as a new column name
 </div>
 </section>
 <section id="with-deep-extract">
-<h2>With deep extract<a class="headerlink" href="#with-deep-extract" title="Permalink to this headline"></a></h2>
+<h2>With deep extract<a class="headerlink" href="#with-deep-extract" title="Permalink to this heading"></a></h2>
 <p>With <code class="docutils literal notranslate"><span class="pre">deep_extract=True</span></code>, each element is analyzed whether it contains lists or dictionaries and structured accordingly. If a column name already exists, the value is added into that column for the specific row.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Convert to onehot dense-array with the ``deep_extract=True`` function</span>
 <span class="n">results</span> <span class="o">=</span> <span class="n">df2onehot</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">deep_extract</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -349,7 +356,10 @@ The result is a dataframe where each nested element is used as a new column name
 </div>
 <hr>
 <center>
-        <script async type="text/javascript" src="//cdn.carbonads.com/carbon.js?serve=CEADP27U&placement=erdogantgithubio" id="_carbonads_js"></script>
+        <script async src="https://media.ethicalads.io/media/client/ethicalads.min.js"></script>
+        <!-- Show an image ad -->
+        <div data-ea-publisher="erdogantgithubio" data-ea-type="image"></div>
+        <!-- <div data-ea-publisher="erdogantgithubio" data-ea-type="text"></div> -->
 </center>
 <hr></section>
 </section>
