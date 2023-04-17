@@ -1,7 +1,22 @@
-echo "Cleaning previous builds first.."
+echo "Cleaning repo first.."
 rm -rf dist
 rm -rf build
 rm -rf df2onehot.egg-info
 rm -rf __pycache__
 rm -rf .pytest_cache
+rm -rf df2onehot/__pycache__
+rm -rf df2onehot/.pylint.d
+rm -rf df2onehot/tests/__pycache__
+rm -rf tests/__pycache__
+rm -rf df2onehot/utils/__pycache__
 rm -rf .pylint.d
+rm -rf df2onehot/data/*.zip
+rm -rf df2onehot/data/*.csv
+rm -rf *.js
+rm -rf *.html
+rm -rf *.css
+rm -rf *.dot
+rm -rf *.png
+rm -rf .coverage*
+rm -rf .pkl
+rm -rf df2onehot.egg-info
