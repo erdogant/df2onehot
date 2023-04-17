@@ -23,7 +23,7 @@ onehot_encoder = OneHotEncoder(sparse=False, categories='auto')
 warnings.filterwarnings('ignore')
 
 # %% Dataframe to one-hot
-def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True, deep_extract=False, excl_background=None, verbose=3):
+def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True, deep_extract=False, excl_background=None, remove_mutual_exclusive=False, verbose=3):
     """Convert dataframe to one-hot matrix.
 
     Parameters
@@ -41,6 +41,9 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
     deep_extract : bool [False, True] (default : False)
         True: Extract information from a vector that contains a list/array/dict.
         False: converted to a string and treated as catagorical ['cat'].
+    remove_mutual_exclusive : bool [False, True] (default : False)
+        True: Remove the mutual exclusive groups. In binairy features; False and 0 are excluded.
+        False: Do nothing
     excl_background : list or None, [0], [0, '0.0', 'unknown', 'nan', 'None' ...], optional
         Remove values/strings that labeled in the list. As an example, the following column: ['yes', 'no', 'yes', 'yes','no','unknown', ...], is split into 'column_yes', 'column_no' and 'column_unknown'. If unknown listed, then 'column_unknown' is not transformed into a new one-hot column.
         The default is None (every possible name is converted into a one-hot column)
@@ -116,8 +119,18 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
             out_numeric[df.columns[i]] = out_numeric[df.columns[i]].astype('category')
             if verbose>=4: print('[df2onehot] >Processing: %s%s [%.0f]' %(df.columns[i][0:maxstring], makespaces, len(np.unique(integer_encoded)) ))
 
+            # Remove mutual exclusive values
+            status_bool=False
+            if remove_mutual_exclusive and len(np.unique(integer_encoded))==2:
+                if np.isin(np.unique(integer_encoded), [0, 1]).sum()>=2:
+                    status_bool=True
+
             # Contains a single value or is bool
-            if (len(np.unique(integer_encoded))<=1) or (str(df.dtypes[i])=='bool'):
+            if status_bool:
+                label = df.columns[i] + '_' + str(df.iloc[integer_encoded==1, i].values[0])
+                out_onehot[label] = integer_encoded.astype('bool')
+                labx.append(label)
+            elif (len(np.unique(integer_encoded))<=1) or (str(df.dtypes[i])=='bool'):
                 out_onehot[df.columns[i]] = integer_encoded.astype('bool')
                 labx.append(df.columns[i])
             else:
