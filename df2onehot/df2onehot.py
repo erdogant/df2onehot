@@ -17,8 +17,8 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 
-# from df2onehot.utils import set_dtypes
-from utils import set_dtypes
+from df2onehot.utils import set_dtypes
+# from utils import set_dtypes
 
 # from set_dtypes import set_dtypes
 label_encoder = LabelEncoder()
