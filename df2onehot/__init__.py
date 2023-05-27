@@ -11,16 +11,12 @@ from df2onehot.utils import (
 
 __author__ = 'Erdogan Tasksen'
 __email__ = 'erdogant@gmail.com'
-__version__ = '1.0.3'
+__version__ = '1.0.4'
 
 # module level doc-string
 __doc__ = """
 df2onehot is an Python package to convert a pandas dataframe into a stuctured dataframe.
 =============================================================================================
-
-Description
------------
-To convert a pandas dataframe into a more stuctured dataframe.
 
 Example
 -------

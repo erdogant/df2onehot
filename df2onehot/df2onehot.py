@@ -9,21 +9,34 @@
 
 # %% Libraries
 import warnings
-import wget
+import datazets as dz
 import os
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
-from df2onehot.utils import set_dtypes
+
+# from df2onehot.utils import set_dtypes
+from utils import set_dtypes
+
 # from set_dtypes import set_dtypes
 label_encoder = LabelEncoder()
 onehot_encoder = OneHotEncoder(sparse=False, categories='auto')
 warnings.filterwarnings('ignore')
 
+
 # %% Dataframe to one-hot
-def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True, deep_extract=False, excl_background=None, remove_mutual_exclusive=False, verbose=3):
+def df2onehot(df,
+              dtypes='pandas',
+              y_min=2,
+              perc_min_num=None,
+              hot_only=True,
+              deep_extract=False,
+              excl_background=None,
+              remove_mutual_exclusive=False,
+              remove_multicollinearity=False,
+              verbose=3):
     """Convert dataframe to one-hot matrix.
 
     Parameters
@@ -41,8 +54,11 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
     deep_extract : bool [False, True] (default : False)
         True: Extract information from a vector that contains a list/array/dict.
         False: converted to a string and treated as catagorical ['cat'].
-    remove_mutual_exclusive : bool [False, True] (default : False)
+    remove_mutual_exclusive: bool [False, True] (default : False)
         True: Remove the mutual exclusive groups. In binairy features; False and 0 are excluded.
+        False: Do nothing
+    remove_multicollinearity: bool [False, True] (default : False)
+        True: Remove multicollinear columns by removing one columns for each catagory that is converted into onehot.
         False: Do nothing
     excl_background : list or None, [0], [0, '0.0', 'unknown', 'nan', 'None' ...], optional
         Remove values/strings that labeled in the list. As an example, the following column: ['yes', 'no', 'yes', 'yes','no','unknown', ...], is split into 'column_yes', 'column_no' and 'column_unknown'. If unknown listed, then 'column_unknown' is not transformed into a new one-hot column.
@@ -100,7 +116,7 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
     max_str_len = np.minimum(np.max(list(map(len, df.columns.values.astype(str).tolist()))) + 2, maxstring)
 
     # Run over all columns
-    for i in tqdm(np.arange(0, df.shape[1]), disable=disable):
+    for i in tqdm(np.arange(0, df.shape[1]), disable=disable, desc='[df2onehot]'):
         makespaces = ''.join(['.'] * np.minimum( (max_str_len - len(df.columns[i])), maxstring) )
         # Do not touch a float
         if 'float' in str(df.dtypes[i]):
@@ -121,12 +137,13 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
 
             # Remove mutual exclusive values
             status_bool=False
-            if remove_mutual_exclusive and len(np.unique(integer_encoded))==2:
+            if (remove_mutual_exclusive or remove_multicollinearity) and len(np.unique(integer_encoded))==2:
                 if np.isin(np.unique(integer_encoded), [0, 1]).sum()>=2:
                     status_bool=True
 
             # Contains a single value or is bool
             if status_bool:
+                if verbose >=3: print('[df2onehot] >Remove mutual exclusive for [%s]' %(df.columns[i]))
                 label = df.columns[i] + '_' + str(df.iloc[integer_encoded==1, i].values[0])
                 out_onehot[label] = integer_encoded.astype('bool')
                 labx.append(label)
@@ -136,9 +153,15 @@ def df2onehot(df, dtypes='pandas', y_min=None, perc_min_num=None, hot_only=True,
             else:
                 # binary encode
                 onehot_encoded = onehot_encoder.fit_transform(integer_encoded.reshape(-1, 1))
+                total_columns = onehot_encoded.shape[1]
                 # Remove columns if it does not fullfill minimum nr. of samples (>=y_min)
                 if y_min is not None:
                     onehot_encoded = onehot_encoded[:, onehot_encoded.sum(axis=0) >= y_min]
+                # Remove a columns in case to prevent multicollinearity. If a column was already removed for some reason. Do not touch.
+                if remove_multicollinearity and onehot_encoded.shape[1]==total_columns:
+                    if verbose >=3: print('[df2onehot] >Remove multicollinearity for [%s]' %(df.columns[i]))
+                    onehot_encoded = onehot_encoded[:, 1:]
+
                 # Make new one-hot columns
                 for k in range(0, onehot_encoded.shape[1]):
                     # Get the colname based on the value in the orignal dataframe
@@ -311,7 +334,7 @@ def _extract_dict(df, dtypes, verbose=3):
         idxCol = np.where(Idict)[0]
         max_str_len = np.max(list(map(len, df.columns[idxCol].values.astype(str).tolist())))
         # Expand every columns that contains dict
-        for idx in tqdm(idxCol, disable=disable):
+        for idx in tqdm(idxCol, disable=disable, desc='[df2onehot]'):
             makespaces = ''.join([' '] * (max_str_len - len(df.columns[idx])))
             try:
                 dfc, idxempty = dict2df(df.iloc[:, idx])
@@ -346,7 +369,7 @@ def _extract_list(df, dtypes, verbose=3):
         idxCol = np.where(Ilist)[0]
         max_str_len = np.max(list(map(len, df.columns[idxCol].values.astype(str).tolist())))
         # Expand every columns that contains either list
-        for idx in tqdm(idxCol, disable=disable):
+        for idx in tqdm(idxCol, disable=disable, desc='[df2onehot]'):
             makespaces = ''.join([' '] * (max_str_len - len(df.columns[idx])))
             # Convert str/float/int to list
             # df, uifeat = _col2type(df, dtypes, idx)
@@ -420,11 +443,9 @@ def _findcol(x, cols):
 
 
 # %% Import example dataset from github.
-def import_example(data='titanic', url=None, sep=',', verbose=3):
+def import_example(data='titanic', url=None, sep=',', overwrite=False, verbose=3):
     """Import example dataset from github source.
 
-    Description
-    -----------
     Import one of the few datasets from github source or specify your own download url link.
 
     Parameters
@@ -442,53 +463,19 @@ def import_example(data='titanic', url=None, sep=',', verbose=3):
         Dataset containing mixed features.
 
     """
-    if url is None:
-        if data=='sprinkler':
-            url='https://erdogant.github.io/datasets/sprinkler.zip'
-        elif data=='titanic':
-            url='https://erdogant.github.io/datasets/titanic_train.zip'
-        elif data=='student':
-            url='https://erdogant.github.io/datasets/student_train.zip'
-        elif data=='cancer':
-            url='https://erdogant.github.io/datasets/cancer_dataset.zip'
-        elif data=='fifa':
-            url='https://erdogant.github.io/datasets/FIFA_2018.zip'
-        elif data=='waterpump':
-            url='https://erdogant.github.io/datasets/waterpump/waterpump_test.zip'
-        elif data=='complex':
-            df = pd.DataFrame(index=np.arange(0, 25))
-            df['feat_1'] = np.nan
-            df['feat_1'].iloc[0] = ['3', 4]
-            df['feat_1'].iloc[2] = ['5', '6', '7', '8']
-            df['feat_1'].iloc[20] = ['9', '11', '4']
-            df['feat_1'].iloc[5] = 10
-            df['feat_1'].iloc[15] = 1
-            df['feat_2'] = np.nan
-            df['feat_2'].iloc[0] = ['4', '45']
-            df['feat_2'].iloc[15] = 1
-            df['feat_2'].iloc[20] = 10
-            return df
-        # elif data=='retail':
-            # url='https://erdogant.github.io/datasets/marketing_data_online_retail_small.zip'
+    if data=='complex':
+        df = pd.DataFrame(index=np.arange(0, 25))
+        df['feat_1'] = np.nan
+        df['feat_1'].iloc[0] = ['3', 4]
+        df['feat_1'].iloc[2] = ['5', '6', '7', '8']
+        df['feat_1'].iloc[20] = ['9', '11', '4']
+        df['feat_1'].iloc[5] = 10
+        df['feat_1'].iloc[15] = 1
+        df['feat_2'] = np.nan
+        df['feat_2'].iloc[0] = ['4', '45']
+        df['feat_2'].iloc[15] = 1
+        df['feat_2'].iloc[20] = 10
     else:
-        data = wget.filename_from_url(url)
+        df = dz.get(data=data, url=url, sep=sep, overwrite=overwrite)
 
-    if url is None:
-        if verbose>=3: print('[df2onehot] >Nothing to download.')
-        return None
-
-    curpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
-    PATH_TO_DATA = os.path.join(curpath, wget.filename_from_url(url))
-    if not os.path.isdir(curpath):
-        os.makedirs(curpath, exist_ok=True)
-
-    # Check file exists.
-    if not os.path.isfile(PATH_TO_DATA):
-        if verbose>=3: print('[df2onehot] >Downloading [%s] dataset from github source..' %(data))
-        wget.download(url, curpath)
-
-    # Import local dataset
-    if verbose>=3: print('[df2onehot] >Import dataset [%s]' %(data))
-    df = pd.read_csv(PATH_TO_DATA, sep=sep)
-    # Return
     return df

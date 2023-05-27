@@ -1,8 +1,15 @@
 # %%
-import numpy as np
-from df2onehot import df2onehot, import_example
+# import numpy as np
+# from df2onehot import df2onehot, import_example
 # print(df2onehot.__version__)
 
+# %% Load example
+from df2onehot import df2onehot, import_example
+df = import_example(data="titanic")
+dfhot = df2onehot(df, remove_multicollinearity=True, y_min=2)['onehot']
+
+
+# %%
 df = import_example('complex')
 
 # Run df2onehot
@@ -11,10 +18,6 @@ results = df2onehot(df, deep_extract=True)
 results['onehot']
 results['numeric']
 
-
-# %% Load example
-from df2onehot import df2onehot, import_example
-df = import_example(data="titanic")
 
 
 # %% Convert
