@@ -100,6 +100,10 @@ def df2onehot(df,
     labels = None
     disable = (True if (verbose==0 or verbose>3) else False)
 
+    if len(np.unique(df.columns))!=len(df.columns):
+        if verbose>2: print('[df2onehot] >WARNING> The column labels must be unique.')
+        df.columns = make_elements_unique(df.columns.values)
+
     # Reset index
     df = df.copy()
     df.reset_index(drop=True, inplace=True)
@@ -479,3 +483,14 @@ def import_example(data='titanic', url=None, sep=',', overwrite=False, verbose=3
         df = dz.get(data=data, url=url, sep=sep, overwrite=overwrite)
 
     return df
+
+
+# %%
+def make_elements_unique(X):
+    uix, counts = np.unique(X, return_counts=True)
+    idx = np.where(counts>1)[0]
+    for i in idx:
+        Iloc = uix[i]==X
+        lst = X[Iloc]
+        X[Iloc] = [f"{element}_{index+1}" for index, element in enumerate(lst)]
+    return X
