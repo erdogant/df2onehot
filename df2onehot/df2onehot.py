@@ -8,6 +8,7 @@
 # ----------------------------------------------------
 
 # %% Libraries
+from packaging import version
 import warnings
 import datazets as dz
 import os
@@ -20,9 +21,16 @@ from sklearn.preprocessing import OneHotEncoder
 from df2onehot.utils import set_dtypes
 # from utils import set_dtypes
 
+import sklearn
+if version.parse(sklearn.__version__) < version.parse('1.4.0'):
+    print('[Warning]> This release requires scikit-learn version >= 1.4.0. Try: pip install -U scikit-learn')
+    onehot_encoder = OneHotEncoder(sparse=False, categories='auto')
+else:
+    onehot_encoder = OneHotEncoder(sparse_output=False, categories='auto')
+
+
 # from set_dtypes import set_dtypes
 label_encoder = LabelEncoder()
-onehot_encoder = OneHotEncoder(sparse=False, categories='auto')
 warnings.filterwarnings('ignore')
 
 

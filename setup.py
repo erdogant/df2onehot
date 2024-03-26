@@ -13,7 +13,7 @@ else:
 with open("README.md", "r") as fh:
     long_description = fh.read()
 setuptools.setup(
-     install_requires=['scikit-learn','numpy','pandas','tqdm','datazets'],
+     install_requires=['packaging','scikit-learn','numpy','pandas','tqdm','datazets'],
      python_requires='>=3',
      name='df2onehot',
      version=new_version,
