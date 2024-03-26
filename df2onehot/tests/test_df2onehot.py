@@ -11,7 +11,7 @@ class Testdf2onehot(unittest.TestCase):
 		df = import_example(data='titanic')
 		df['all_true']=1
 		# TEST 1: check output is unchanged
-		out = df2onehot(df)
+		out = df2onehot(df, y_min=0)
 		assert [*out.keys()]==['numeric', 'dtypes', 'onehot', 'labx', 'df', 'labels']
 
 		# TEST 2: Check model output is unchanged
@@ -25,7 +25,7 @@ class Testdf2onehot(unittest.TestCase):
 
 		# TEST 3:
 		df = import_example(data='titanic')
-		out = df2onehot(df, deep_extract=False, perc_min_num=0.8)
+		out = df2onehot(df, deep_extract=False, perc_min_num=0.8, y_min=0)
 		[uiy, ycounts] = np.unique(out['labx'], return_counts=True)
 		assert np.all(ycounts==np.array([148,   4, 891,   7,   3,   2,   7,   2, 681]))
 
