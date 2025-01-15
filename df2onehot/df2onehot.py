@@ -329,7 +329,7 @@ def _deep_extract(df, dtypes, perc_min_num=None, verbose=3):
     # Return
     if df.shape[1]!=len(dtypes): raise Exception('[df2onehot] >Error: size of dtypes and dataframe does not match.')
     if df.shape[1]!=len(labels): raise Exception('[df2onehot] >Error: size of dtypes and dataframe does not match.')
-    return(df, dtypes, labels)
+    return df, dtypes, labels
 
 
 # %%
@@ -406,7 +406,7 @@ def _extract_list(df, dtypes, verbose=3):
 def _extract_combine(df, dtypes, dftot1, dftot2, idxrem1, idxrem2, label1, label2, perc_min_num, verbose=3):
     if verbose>=5: print('[df2onehot] >Deep extract merging..')
     # Drop columns that are expanded
-    labels = []
+    labels = df.columns.values
     idxrem = idxrem1 + idxrem2
     if len(idxrem)>0:
         # Remove the extracted column names from list and dict
