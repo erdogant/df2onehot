@@ -406,6 +406,7 @@ def _extract_list(df, dtypes, verbose=3):
 def _extract_combine(df, dtypes, dftot1, dftot2, idxrem1, idxrem2, label1, label2, perc_min_num, verbose=3):
     if verbose>=5: print('[df2onehot] >Deep extract merging..')
     # Drop columns that are expanded
+    labels = []
     idxrem = idxrem1 + idxrem2
     if len(idxrem)>0:
         # Remove the extracted column names from list and dict
