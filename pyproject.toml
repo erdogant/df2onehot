@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "df2onehot"
+dynamic = ["version"]
+authors = [{ name = "Erdogan Taskesen", email = "erdogant@gmail.com" },]
+description = "Python package df2onehot is to convert a pandas dataframe into a stuctured dataframe."
+readme = "README.md"
+requires-python = ">=3"
+license = { file = "LICENSE" }
+keywords = ["Python", "one-hot encoding", "preprocessing", "structering"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    'packaging',
+    'scikit-learn',
+    'numpy',
+    'pandas',
+    'tqdm',
+    'datazets',
+]
+
+[project.urls]
+Homepage = "https://erdogant.github.io/df2onehot"
+Download = "https://github.com/erdogant/df2onehot/archive/{version}.tar.gz"
+
+[tool.setuptools]
+packages = ["df2onehot"]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = { attr = "df2onehot.__version__" }
