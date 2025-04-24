@@ -1,23 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Input/Output &mdash; df2onehot df2onehot documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=e0179649" />
+
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a25778"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -30,14 +29,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> df2onehot
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            df2onehot
           </a>
-              <div class="version">
-                1.0.2
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -68,6 +68,7 @@
 <li class="toctree-l1"><a class="reference internal" href="df2onehot.df2onehot.html"><code class="docutils literal notranslate"><span class="pre">df2onehot()</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="df2onehot.df2onehot.html#df2onehot.df2onehot.dict2df"><code class="docutils literal notranslate"><span class="pre">dict2df()</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="df2onehot.df2onehot.html#df2onehot.df2onehot.import_example"><code class="docutils literal notranslate"><span class="pre">import_example()</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="df2onehot.df2onehot.html#df2onehot.df2onehot.make_elements_unique"><code class="docutils literal notranslate"><span class="pre">make_elements_unique()</span></code></a></li>
 </ul>
 
     <a href= "genindex.html">Index</a>
@@ -85,8 +86,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Input/Output</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Input/Output</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/Tutorials.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -97,61 +98,75 @@
            <div itemprop="articleBody">
              
   <section id="module-df2onehot.df2onehot.df2onehot">
-<span id="input-output"></span><h1>Input/Output<a class="headerlink" href="#module-df2onehot.df2onehot.df2onehot" title="Permalink to this heading"></a></h1>
+<span id="input-output"></span><h1>Input/Output<a class="headerlink" href="#module-df2onehot.df2onehot.df2onehot" title="Link to this heading"></a></h1>
 <p>Convert dataframe to one-hot matrix.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param df</dt>
+<dt class="field-odd">param df<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Input dataframe for which the rows are the features, and colums are the samples.</p>
 </dd>
-<dt class="field-even">type df</dt>
+<dt class="field-even">type df<span class="colon">:</span></dt>
 <dd class="field-even"><p>pd.DataFrame()</p>
 </dd>
-<dt class="field-odd">param dtypes</dt>
+<dt class="field-odd">param dtypes<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Representation of the columns in the form of [‘cat’,’num’]. By default the dtype is determiend based on the pandas dataframe.</p>
 </dd>
-<dt class="field-even">type dtypes</dt>
+<dt class="field-even">type dtypes<span class="colon">:</span></dt>
 <dd class="field-even"><p>list of str or ‘pandas’, optional</p>
 </dd>
-<dt class="field-odd">param y_min</dt>
+<dt class="field-odd">param y_min<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Minimal number of sampels that must be present in a group. All groups with less then y_min samples are labeled as _other_ and are not used in the enriching model. The default is None.</p>
 </dd>
-<dt class="field-even">type y_min</dt>
+<dt class="field-even">type y_min<span class="colon">:</span></dt>
 <dd class="field-even"><p>int [0..len(y)], optional</p>
 </dd>
-<dt class="field-odd">param perc_min_num</dt>
+<dt class="field-odd">param perc_min_num<span class="colon">:</span></dt>
 <dd class="field-odd"><p>This parameters can be used to force variables into numeric ones if unique non-zero values are above the percentage. The default is None. Alternative can be 0.8</p>
 </dd>
-<dt class="field-even">type perc_min_num</dt>
+<dt class="field-even">type perc_min_num<span class="colon">:</span></dt>
 <dd class="field-even"><p>float [None, 0..1], optional</p>
 </dd>
-<dt class="field-odd">param hot_only</dt>
+<dt class="field-odd">param hot_only<span class="colon">:</span></dt>
 <dd class="field-odd"><p>When True; the output of the onehot matrix exclusively contains categorical values that are transformed to one-hot. The default is True.</p>
 </dd>
-<dt class="field-even">type hot_only</dt>
+<dt class="field-even">type hot_only<span class="colon">:</span></dt>
 <dd class="field-even"><p>bool [True, False], optional</p>
 </dd>
-<dt class="field-odd">param deep_extract</dt>
+<dt class="field-odd">param deep_extract<span class="colon">:</span></dt>
 <dd class="field-odd"><p>True: Extract information from a vector that contains a list/array/dict.
 False: converted to a string and treated as catagorical [‘cat’].</p>
 </dd>
-<dt class="field-even">type deep_extract</dt>
+<dt class="field-even">type deep_extract<span class="colon">:</span></dt>
 <dd class="field-even"><p>bool [False, True] (default : False)</p>
 </dd>
-<dt class="field-odd">param excl_background</dt>
+<dt class="field-odd">param remove_mutual_exclusive<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True: Remove the mutual exclusive groups. In binairy features; False and 0 are excluded.
+False: Do nothing</p>
+</dd>
+<dt class="field-even">type remove_mutual_exclusive<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool [False, True] (default : False)</p>
+</dd>
+<dt class="field-odd">param remove_multicollinearity<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True: Remove multicollinear columns by removing one columns for each catagory that is converted into onehot.
+False: Do nothing</p>
+</dd>
+<dt class="field-even">type remove_multicollinearity<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool [False, True] (default : False)</p>
+</dd>
+<dt class="field-odd">param excl_background<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Remove values/strings that labeled in the list. As an example, the following column: [‘yes’, ‘no’, ‘yes’, ‘yes’,’no’,’unknown’, …], is split into ‘column_yes’, ‘column_no’ and ‘column_unknown’. If unknown listed, then ‘column_unknown’ is not transformed into a new one-hot column.
 The default is None (every possible name is converted into a one-hot column)</p>
 </dd>
-<dt class="field-even">type excl_background</dt>
+<dt class="field-even">type excl_background<span class="colon">:</span></dt>
 <dd class="field-even"><p>list or None, [0], [0, ‘0.0’, ‘unknown’, ‘nan’, ‘None’ …], optional</p>
 </dd>
-<dt class="field-odd">param verbose</dt>
+<dt class="field-odd">param verbose<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Print message to screen. The default is 3.
 0: (default), 1: ERROR, 2: WARN, 3: INFO, 4: DEBUG, 5: TRACE</p>
 </dd>
-<dt class="field-even">type verbose</dt>
+<dt class="field-even">type verbose<span class="colon">:</span></dt>
 <dd class="field-even"><p>int, optional</p>
 </dd>
-<dt class="field-odd">returns</dt>
+<dt class="field-odd">returns<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><em>dict</em></p></li>
 <li><p><strong>numeric</strong> (<em>DataFrame</em>) – Input-dataframe with converted numerical values</p></li>
@@ -164,7 +179,7 @@ The default is None (every possible name is converted into a one-hot column)</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">df2onehot</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">df2onehot</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">df2onehot</span><span class="o">.</span><span class="n">import_example</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">out</span> <span class="o">=</span> <span class="n">df2onehot</span><span class="o">.</span><span class="n">df2onehot</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 </pre></div>
