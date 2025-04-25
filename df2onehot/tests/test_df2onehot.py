@@ -64,7 +64,7 @@ class Testdf2onehot(unittest.TestCase):
 
 		# Run df2onehot
 		out = df2onehot(df, deep_extract=True)
-		counts = out['numeric'][list(colnames)].sum(axis=1)
+		counts = out['numeric'][list(colnames)].values.sum(axis=1)
 		# Make some checks
 		for i in range(0,df.shape[0]):
 			if isinstance(list(), type(df['lists'].iloc[i])):
@@ -85,7 +85,7 @@ class Testdf2onehot(unittest.TestCase):
 		# Run df2onehot
 		del out
 		out = df2onehot(df, deep_extract=True)
-		counts = out['numeric'][list(colnames)].sum(axis=1)
+		counts = out['numeric'][list(colnames)].values.sum(axis=1)
 		# Make some checks
 		for i in range(0,df.shape[0]):
 			if isinstance(list(), type(df['lists'].iloc[i])):
