@@ -124,6 +124,8 @@ def df2onehot(df,
     # Make empty frames
     maxstring=50
     out_numeric = pd.DataFrame()
+    # @jjaycez: Fix to avoid repeatedly using pd.concat in the main loop
+    out_onehot_parts = []
     out_onehot = pd.DataFrame()
     max_str_len = np.minimum(np.max(list(map(len, df.columns.values.astype(str).tolist()))) + 2, maxstring)
 
@@ -158,11 +160,11 @@ def df2onehot(df,
                 if verbose >=3: print('[df2onehot] >Remove mutual exclusive for [%s]' %(df.columns[i]))
                 label = df.columns[i] + '_' + str(df.iloc[integer_encoded==1, i].values[0])
                 temp_df = pd.DataFrame({label: integer_encoded.astype('bool')}, index=df.index)
-                out_onehot = pd.concat([out_onehot, temp_df], axis=1)
+                out_onehot_parts.append(temp_df)
                 labx.append(label)
             elif (len(np.unique(integer_encoded))<=1) or (str(df.dtypes.iloc[i])=='bool'):
                 temp_df = pd.DataFrame({df.columns[i]: integer_encoded.astype('bool')}, index=df.index)
-                out_onehot = pd.concat([out_onehot, temp_df], axis=1)
+                out_onehot_parts.append(temp_df)
                 labx.append(df.columns[i])
             else:
                 # binary encode
@@ -191,11 +193,13 @@ def df2onehot(df,
 
                 if temp_cols:
                     temp_df = pd.DataFrame(temp_cols, index=df.index)
-                    out_onehot = pd.concat([out_onehot, temp_df], axis=1)
+                    out_onehot_parts.append(temp_df)
 
                 # Make numerical vector
                 if onehot_encoded.shape[1]>2:
                     out_numeric[df.columns[i]] = (onehot_encoded * np.arange(1, onehot_encoded.shape[1] + 1)).sum(axis=1)
+    # @jjaycez: Single pd.concat outside of main loop
+    out_onehot = pd.concat(out_onehot_parts, axis=1) if out_onehot_parts else pd.DataFrame(index=df.index)
 
     uiy, ycounts = np.unique(labx, return_counts=True)
     if verbose >=3: print('[df2onehot] >Total onehot features: %.0d' %(np.sum(ycounts)))
