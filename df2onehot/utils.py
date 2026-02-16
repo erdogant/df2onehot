@@ -157,14 +157,14 @@ def _set_types(df, dtypes, verbose=3):
         elif dtype=='bool':
             Inull = df[col].isna().values
             # @jjaycez: `pandas` does not allow to have None values in boolean columns
+            # @jjaycez: Implemented simpler logic suggested by Copilot review
             if Inull.any():
-                # If this is a numpy bool column, convert to pandas nullable boolean first
-                if df[col].dtype == bool or str(df[col].dtype) == "bool":
-                    df[col] = df[col].astype("boolean")
-                    df.loc[Inull, col] = pd.NA
-                else:
-                    df.loc[Inull, col] = None
-            df[col] = df[col].astype(bool)
+                # Use pandas nullable boolean dtype to support missing values
+                df[col] = df[col].astype("boolean")
+                df.loc[Inull, col] = pd.NA
+            else:
+                # No missing values: regular bool dtype is fine
+                df[col] = df[col].astype(bool)
         else:
             if verbose>=5: print('[df2onehot] >[%s] %s > deep extract > [%s]' %(col, makespaces, dtype))
 

@@ -106,7 +106,8 @@ class Testdf2onehot(unittest.TestCase):
             for y_min in ymins:
                 print(y_min, n)
                 # @jjaycez: `random_integers` is deprecated
-                tmpdata = np.random.randint(0, 1, size=(n, n))
+                # @jjaycez: `randint` upper limit is exclusive, so we use 2 instead of 1 to get 0 and 1
+                tmpdata = np.random.randint(0, 2, size=(n, n))
                 df = pd.DataFrame(data=tmpdata)
                 df.columns = df.columns.astype(str)
                 df['allfalse'] = 0
