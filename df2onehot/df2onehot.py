@@ -14,21 +14,21 @@ import datazets as dz
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder
-from sklearn.preprocessing import OneHotEncoder
 
-from df2onehot.utils import set_dtypes
-# from utils import set_dtypes
+try:
+    from df2onehot.utils import set_dtypes
+except:
+    from utils import set_dtypes
 
 import sklearn
+from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import OneHotEncoder
 if version.parse(sklearn.__version__) < version.parse('1.4.0'):
     print('[Warning]> This release requires scikit-learn version >= 1.4.0. Try: pip install -U scikit-learn')
     onehot_encoder = OneHotEncoder(sparse=False, categories='auto')
 else:
     onehot_encoder = OneHotEncoder(sparse_output=False, categories='auto')
 
-
-# from set_dtypes import set_dtypes
 label_encoder = LabelEncoder()
 warnings.filterwarnings('ignore')
 

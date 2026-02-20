@@ -4,9 +4,18 @@ import numpy as np
 from df2onehot import df2onehot, import_example
 import unittest
 
-
 class Testdf2onehot(unittest.TestCase):
-
+    
+    def test_blog(self):
+        url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/00468/online_shoppers_intention.csv'
+        # Import data from url
+        df = import_example(url=url)
+        # Preprocessing
+        cols_as_float = ['ProductRelated', 'Administrative']
+        df[cols_as_float]=df[cols_as_float].astype(float)
+        dfhot = df2onehot(df, excl_background=['0.0', 'None', '?', 'False'], y_min=50, perc_min_num=0.8, remove_mutual_exclusive=True, verbose=4)['onehot']
+        assert dfhot.shape == (12330, 55)
+        
     def test_df2onehot(self):
         df = import_example(data='titanic')
         df['all_true'] = 1
