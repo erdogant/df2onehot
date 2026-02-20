@@ -67,20 +67,20 @@ def _auto_dtypes(df, dtypes, deep_extract=False, perc_min_num=None, num_if_decim
         logstr = '   '
 
         for i in tqdm(range(0, df.shape[1]), disable=disable):
-            if 'float' in str(df.dtypes[i]):
+            if 'float' in str(df.dtypes.iloc[i]):
                 dtypes[i]='num'
                 logstr = ('[float]')
-            elif 'int' in str(df.dtypes[i]):
+            elif 'int' in str(df.dtypes.iloc[i]):
                 # logstr = (' > [integer]: Set to categorical. Uniqueness=%.2f' %(df.iloc[:,i].unique().shape[0]/df.shape[0]))
                 dtypes[i]='cat'
                 logstr = ('[int]  ')
-            elif 'str' in str(df.dtypes[i]):
+            elif 'str' in str(df.dtypes.iloc[i]):
                 dtypes[i]='cat'
                 logstr = ('[str]  ')
-            elif ('object' in str(df.dtypes[i])) and not deep_extract:
+            elif ('object' in str(df.dtypes.iloc[i])) and not deep_extract:
                 dtypes[i]='cat'
                 logstr = ('[obj]  ')
-            elif 'object' in str(df.dtypes[i]) and deep_extract:
+            elif 'object' in str(df.dtypes.iloc[i]) and deep_extract:
                 # Check whether this is a list or array
                 logstr = ('[obj]  ')
                 tmpdf = df.iloc[:, i]
@@ -97,7 +97,7 @@ def _auto_dtypes(df, dtypes, deep_extract=False, perc_min_num=None, num_if_decim
                     dtypes[i]='dict'
                 else:
                     dtypes[i]='cat'
-            elif 'bool' in str(df.dtypes[i]):
+            elif 'bool' in str(df.dtypes.iloc[i]):
                 dtypes[i]='bool'
                 logstr = ('[bool]  ')
             else:
@@ -105,7 +105,7 @@ def _auto_dtypes(df, dtypes, deep_extract=False, perc_min_num=None, num_if_decim
                 logstr = ('[???]  ')
             
             # Force numerical if unique elements are above percentage
-            if (perc_min_num is not None) and (('float' in str(df.dtypes[i])) or ('int' in str(df.dtypes[i]))):
+            if (perc_min_num is not None) and (('float' in str(df.dtypes.iloc[i])) or ('int' in str(df.dtypes.iloc[i]))):
                 tmpvalues = df.iloc[:,i].dropna().astype(float).copy()
                 perc=0
                 if len(tmpvalues)>0:
@@ -116,7 +116,7 @@ def _auto_dtypes(df, dtypes, deep_extract=False, perc_min_num=None, num_if_decim
                     # logstr=' > [numerical]: Uniqueness %.2f>=%.2f' %((df.iloc[:,i].unique().shape[0]/df.shape[0]), perc_min_num)
 
             # Force numerical if values are found with decimals
-            if num_if_decimal and (('float' in str(df.dtypes[i])) or ('int' in str(df.dtypes[i]))):
+            if num_if_decimal and (('float' in str(df.dtypes.iloc[i])) or ('int' in str(df.dtypes.iloc[i]))):
                 tmpvalues = df.iloc[:, i].dropna().copy()
                 if np.any(tmpvalues.astype(int) - tmpvalues.astype(float) > 0):
                     dtypes[i] = 'num'
@@ -151,13 +151,20 @@ def _set_types(df, dtypes, verbose=3):
             df[col]=df[col].astype(float)
         elif dtype=='cat':
             Inull = df[col].isna().values
-            df[col].loc[Inull] = None
+            df.loc[Inull, col] = None
             df[col] = df[col].astype(str)
             # df[col] = df[col].astype('category')
         elif dtype=='bool':
             Inull = df[col].isna().values
-            df[col].loc[Inull] = None
-            df[col] = df[col].astype(bool)
+            # @jjaycez: `pandas` does not allow to have None values in boolean columns
+            # @jjaycez: Implemented simpler logic suggested by Copilot review
+            if Inull.any():
+                # Use pandas nullable boolean dtype to support missing values
+                df[col] = df[col].astype("boolean")
+                df.loc[Inull, col] = pd.NA
+            else:
+                # No missing values: regular bool dtype is fine
+                df[col] = df[col].astype(bool)
         else:
             if verbose>=5: print('[df2onehot] >[%s] %s > deep extract > [%s]' %(col, makespaces, dtype))
 

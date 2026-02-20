@@ -124,6 +124,8 @@ def df2onehot(df,
     # Make empty frames
     maxstring=50
     out_numeric = pd.DataFrame()
+    # @jjaycez: Fix to avoid repeatedly using pd.concat in the main loop
+    out_onehot_parts = []
     out_onehot = pd.DataFrame()
     max_str_len = np.minimum(np.max(list(map(len, df.columns.values.astype(str).tolist()))) + 2, maxstring)
 
@@ -131,7 +133,7 @@ def df2onehot(df,
     for i in tqdm(np.arange(0, df.shape[1]), disable=disable, desc='[df2onehot]'):
         makespaces = ''.join(['.'] * np.minimum( (max_str_len - len(df.columns[i])), maxstring) )
         # Do not touch a float
-        if 'float' in str(df.dtypes[i]):
+        if 'float' in str(df.dtypes.iloc[i]):
             # if verbose>=3: print('[df2onehot] >Working on %s' %(df.columns[i]))
             if verbose>=4: print('[df2onehot] >Processing: %s%s [float]' %(df.columns[i][0:maxstring], makespaces))
             out_numeric[df.columns[i]] = df.iloc[:, i]
@@ -157,10 +159,12 @@ def df2onehot(df,
             if status_bool:
                 if verbose >=3: print('[df2onehot] >Remove mutual exclusive for [%s]' %(df.columns[i]))
                 label = df.columns[i] + '_' + str(df.iloc[integer_encoded==1, i].values[0])
-                out_onehot[label] = integer_encoded.astype('bool')
+                temp_df = pd.DataFrame({label: integer_encoded.astype('bool')}, index=df.index)
+                out_onehot_parts.append(temp_df)
                 labx.append(label)
-            elif (len(np.unique(integer_encoded))<=1) or (str(df.dtypes[i])=='bool'):
-                out_onehot[df.columns[i]] = integer_encoded.astype('bool')
+            elif (len(np.unique(integer_encoded))<=1) or (str(df.dtypes.iloc[i])=='bool'):
+                temp_df = pd.DataFrame({df.columns[i]: integer_encoded.astype('bool')}, index=df.index)
+                out_onehot_parts.append(temp_df)
                 labx.append(df.columns[i])
             else:
                 # binary encode
@@ -175,19 +179,27 @@ def df2onehot(df,
                     onehot_encoded = onehot_encoded[:, 1:]
 
                 # Make new one-hot columns
+                # @jjaycez Avoided warning about fragmented array by using a dictionary to store the columns and then
+                #   make a dataframe from the dictionary.
+                temp_cols = {}
                 for k in range(0, onehot_encoded.shape[1]):
-                    # Get the colname based on the value in the orignal dataframe
-                    label = df.iloc[onehot_encoded[:, k]==1, i].unique().astype(str)[0]
-
-                    # Check whether this is a label that should be excluded.
-                    if (isinstance(args['excl_background'], type(None))) or (not np.isin(label, args['excl_background'])):
-                        colname = df.columns[i] + '_' + label
-                        out_onehot[colname] = onehot_encoded[:, k].astype('bool')
+                    label = df.iloc[onehot_encoded[:, k] == 1, i].unique().astype(str)[0]
+                    if (isinstance(args['excl_background'], type(None))) or (
+                    not np.isin(label, args['excl_background'])):
+                        # @jjaycez: It seems that one of the factors may return as a float, so ensuring string type...
+                        colname = str(df.columns[i]) + '_' + str(label)
+                        temp_cols[colname] = onehot_encoded[:, k].astype('bool')
                         labx.append(df.columns[i])
+
+                if temp_cols:
+                    temp_df = pd.DataFrame(temp_cols, index=df.index)
+                    out_onehot_parts.append(temp_df)
 
                 # Make numerical vector
                 if onehot_encoded.shape[1]>2:
                     out_numeric[df.columns[i]] = (onehot_encoded * np.arange(1, onehot_encoded.shape[1] + 1)).sum(axis=1)
+    # @jjaycez: Single pd.concat outside of main loop
+    out_onehot = pd.concat(out_onehot_parts, axis=1) if out_onehot_parts else pd.DataFrame(index=df.index)
 
     uiy, ycounts = np.unique(labx, return_counts=True)
     if verbose >=3: print('[df2onehot] >Total onehot features: %.0d' %(np.sum(ycounts)))
