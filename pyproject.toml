@@ -9,13 +9,35 @@ authors = [{ name = "Erdogan Taskesen", email = "erdogant@gmail.com" },]
 description = "Python package df2onehot is to convert a pandas dataframe into a stuctured dataframe."
 readme = "README.md"
 requires-python = ">=3"
-license = { file = "LICENSE" }
-keywords = ["Python", "one-hot encoding", "preprocessing", "structering"]
+license = "MIT"
+keywords = [
+    "Python",
+    "one-hot encoding",
+    "preprocessing",
+    "structuring",
+    "encoding",
+    "categorical encoding",
+    "df2onehot",
+    "dataframe encoding",
+    "feature engineering",
+    "machine learning",
+    "data transformation",
+    "dummy variables",
+    "pandas",
+    "scikit-learn",
+    "data preprocessing"
+]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Operating System :: Unix",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
+
 dependencies = [
     'packaging',
     'scikit-learn',
