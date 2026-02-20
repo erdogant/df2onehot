@@ -11,7 +11,6 @@
 from packaging import version
 import warnings
 import datazets as dz
-import os
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
