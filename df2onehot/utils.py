@@ -146,7 +146,7 @@ def _auto_dtypes(df, dtypes, deep_extract=False, perc_min_num=None, num_if_decim
 # %% Setup columns in correct dtypes
 def _set_types(df, dtypes):
     assert len(dtypes)==df.shape[1], 'Number of dtypes and columns in df does not match'
-    logger.info(f"Set dtypes in dataframe..")
+    logger.debug(f"Set dtypes in dataframe..")
     max_str_len = np.max(list(map(len, df.columns.values.astype(str).tolist()))) + 2
 
     # remcols=[]
@@ -177,7 +177,7 @@ def _set_types(df, dtypes):
 
 
 # %% Set y
-def set_y(y, y_min=None, numeric=False, verbose=3):
+def set_y(y, y_min=None, numeric=False, verbose=None):
     """Group labels if required.
 
     Parameters
@@ -188,9 +188,6 @@ def set_y(y, y_min=None, numeric=False, verbose=3):
         If unique y-labels are less then absolute y_min, labels are grouped into the _other_ group. The default is None.
     numeric : bool [True, False], optional
         Convert to numeric labels. The default is False.
-    verbose : int, optional
-        Print message to screen. The default is 3.
-        0: (default), 1: ERROR, 2: WARN, 3: INFO, 4: DEBUG, 5: TRACE
 
     Returns
     -------
@@ -200,7 +197,7 @@ def set_y(y, y_min=None, numeric=False, verbose=3):
     y = y.astype(str)
 
     if not isinstance(y_min, type(None)):
-        logger.info(f"Group [y] labels that contains less than {y_min} occurrences are grouped under one single name [_other_]")
+        logger.debug(f"Group [y] labels that contains less than {y_min} occurrences are grouped under one single name [_other_]")
         [uiy, ycounts] = np.unique(y, return_counts=True)
         labx = uiy[ycounts<y_min]
         y = y.astype('O')

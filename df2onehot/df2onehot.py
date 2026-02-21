@@ -511,7 +511,7 @@ def convert_verbose_to_new(verbose):
             3: 'info',
             4: 'debug',
             5: 'debug'}
-        if verbose>=2: print('[XXX] WARNING use the standardized verbose status. The status [1-6] will be deprecated in future versions.')
+        if verbose>=2: print('[df2onehot] WARNING use the standardized verbose status. The status [1-6] will be deprecated in future versions.')
         return status_map.get(verbose, 0)
     else:
         return verbose
