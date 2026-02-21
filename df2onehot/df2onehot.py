@@ -130,7 +130,7 @@ def df2onehot(df,
     df, dtypes = set_dtypes(df, args['dtypes'], deep_extract=args['deep_extract'], perc_min_num=args['perc_min_num'])
     # If any column is a list, also expand the list!
     if args['deep_extract']:
-        df, dtypes, labels = _deep_extract(df, dtypes, perc_min_num=args['perc_min_num'], verbose=args['verbose'])
+        df, dtypes, labels = _deep_extract(df, dtypes, perc_min_num=args['perc_min_num'])
 
     # Make empty frames
     maxstring=50
@@ -154,7 +154,7 @@ def df2onehot(df,
             integer_encoded = label_encoder.fit_transform(df.iloc[:, i])
             # If all values are the same, the encoder will return 0 (=False). We set values at 1 (by +1) and make them True. Otherwise it can be mis interpreted the the value was not present in the datset.
             if np.all(np.unique(integer_encoded)==0): integer_encoded=integer_encoded + 1
-            # integer_encoded = set_y(integer_encoded, y_min=y_min, numeric=True, verbose=0)
+            # integer_encoded = set_y(integer_encoded, y_min=y_min, numeric=True)
             out_numeric[df.columns[i]] = integer_encoded
             out_numeric[df.columns[i]] = out_numeric[df.columns[i]].astype('category')
             logger.debug(f"Processing: {df.columns[i][0:maxstring]}{makespaces} [{len(np.unique(integer_encoded))}]")
@@ -185,7 +185,7 @@ def df2onehot(df,
                     onehot_encoded = onehot_encoded[:, onehot_encoded.sum(axis=0) >= y_min]
                 # Remove a columns in case to prevent multicollinearity. If a column was already removed for some reason. Do not touch.
                 if remove_multicollinearity and onehot_encoded.shape[1]==total_columns:
-                    logger.info(f"Remove multicollinearity for [{df.columns[i]}]")
+                    logger.info(f"Removing multicollinearity for [{df.columns[i]}]")
                     onehot_encoded = onehot_encoded[:, 1:]
 
                 # Make new one-hot columns
@@ -238,7 +238,7 @@ def df2onehot(df,
 
 
 # %% Convert str/float/int to type
-def _col2type(dfc, verbose=3):
+def _col2type(dfc):
     # dtype = dtypes[idx]
     # Gather only the not NaN rows
     Inan = dfc.isna()
@@ -253,11 +253,11 @@ def _col2type(dfc, verbose=3):
         dfc.iloc[dfcol.loc[Iloc].index] = dfcol.loc[Iloc]
 
     # Get all unique elements
-    uifeat = _get_unique_elements(dfcol, verbose=verbose)
+    uifeat = _get_unique_elements(dfcol)
     # Return
     return(dfc, uifeat)
 
-def _get_unique_elements(dfcol, verbose=3):
+def _get_unique_elements(dfcol):
     try:
         # Get all unique elements
         listvector = list(map(lambda x: list(x) , dfcol))
@@ -321,14 +321,14 @@ def dict2df(dfc):
 
 
 # %%
-def _deep_extract(df, dtypes, perc_min_num=None, verbose=3):
+def _deep_extract(df, dtypes, perc_min_num=None):
     logger.debug(f"\nDeep extract..")
     # Extract dict
-    dftot1, label1, idxrem1 = _extract_dict(df, dtypes, verbose=verbose)
+    dftot1, label1, idxrem1 = _extract_dict(df, dtypes)
     # Extract lists
-    dftot2, label2, idxrem2 = _extract_list(df, dtypes, verbose=verbose)
+    dftot2, label2, idxrem2 = _extract_list(df, dtypes)
     # Combine the extracts
-    df, dtypes, labels = _extract_combine(df, dtypes, dftot1, dftot2, idxrem1, idxrem2, label1, label2, perc_min_num, verbose=verbose)
+    df, dtypes, labels = _extract_combine(df, dtypes, dftot1, dftot2, idxrem1, idxrem2, label1, label2, perc_min_num)
 
     # Return
     if df.shape[1]!=len(dtypes): raise Exception('Error: size of dtypes and dataframe does not match.')
@@ -337,7 +337,7 @@ def _deep_extract(df, dtypes, perc_min_num=None, verbose=3):
 
 
 # %%
-def _extract_dict(df, dtypes, verbose=3):
+def _extract_dict(df, dtypes):
     dfout = pd.DataFrame()
     idxrem = []
     Idict = np.isin(dtypes, 'dict')
@@ -368,7 +368,7 @@ def _extract_dict(df, dtypes, verbose=3):
 
 
 # %%
-def _extract_list(df, dtypes, verbose=3):
+def _extract_list(df, dtypes):
     logger.info(f"Deep extraction of lists..")
     Ilist = np.isin(dtypes, 'list')
     dfout = pd.DataFrame()
@@ -383,7 +383,7 @@ def _extract_list(df, dtypes, verbose=3):
         for idx in tqdm(idxCol, disable=disable_tqdm(), desc='[df2onehot]'):
             makespaces = ''.join([' '] * (max_str_len - len(df.columns[idx])))
             # Convert str/float/int to list
-            df.iloc[:, idx], uifeat = _col2type(df.iloc[:, idx], verbose=verbose)
+            df.iloc[:, idx], uifeat = _col2type(df.iloc[:, idx])
             # Convert column into onehot
             if uifeat is not None:
                 dfc = _array2df(df, uifeat, idx)
@@ -400,7 +400,7 @@ def _extract_list(df, dtypes, verbose=3):
 
 
 # %%
-def _extract_combine(df, dtypes, dftot1, dftot2, idxrem1, idxrem2, label1, label2, perc_min_num, verbose=3):
+def _extract_combine(df, dtypes, dftot1, dftot2, idxrem1, idxrem2, label1, label2, perc_min_num):
     if logger.debug: print('Deep extract merging..')
     # Drop columns that are expanded
     labels = df.columns.values
@@ -415,7 +415,7 @@ def _extract_combine(df, dtypes, dftot1, dftot2, idxrem1, idxrem2, label1, label
         dftot = pd.concat([dftot1, dftot2], axis=1)
         labeltot = label1 + label2
         # Remove repetative column names
-        dftot, labeltot = _make_columns_unique(dftot, labeltot, verbose=verbose)
+        dftot, labeltot = _make_columns_unique(dftot, labeltot)
         # Set dtypes
         dftot, dtypest = set_dtypes(dftot, perc_min_num=perc_min_num, deep_extract=False)
         # Combine into dataframe
@@ -428,7 +428,7 @@ def _extract_combine(df, dtypes, dftot1, dftot2, idxrem1, idxrem2, label1, label
 
 
 # %% Remove repetative column
-def _make_columns_unique(dftot, labeltot, verbose=3):
+def _make_columns_unique(dftot, labeltot):
     columns = dftot.columns.value_counts()
     columns = columns[columns.values>1].index.values
     logger.debug(f"[{len(columns)}] repetative columns detected: {columns}")

@@ -68,7 +68,7 @@ def _auto_dtypes(df, dtypes, deep_extract=False, perc_min_num=None, num_if_decim
         logger.warning(f"Verbose is depricated as input parameter. This must be set using the logger.")
 
     if isinstance(dtypes, str):
-        logger.info(f"\nAuto detecting dtypes.")
+        logger.info(f"Auto detecting dtypes.")
         max_str_len = np.max(list(map(len, df.columns.values.astype(str).tolist())))
         dtypes = [''] * df.shape[1]
         logstr = '   '
@@ -230,16 +230,13 @@ def _remove_non_ascii(dfc):
     return dfc
 
 # %% Convert to pandas dataframe
-def is_DataFrame(data, verbose=3):
+def is_DataFrame(data):
     """Convert data into dataframe.
 
     Parameters
     ----------
     data : array-like
         Array-like data matrix.
-    verbose : int, optional
-        Print message to screen. The default is 3.
-        0: (default), 1: ERROR, 2: WARN, 3: INFO, 4: DEBUG, 5: TRACE
 
     Returns
     -------
@@ -253,7 +250,7 @@ def is_DataFrame(data, verbose=3):
     elif isinstance(data, pd.DataFrame):
         pass
     else:
-        logger.info(f"Typing should be pd.DataFrame()!")
+        logger.info("Typing should be pd.DataFrame()!")
         data=None
 
     return(data)
