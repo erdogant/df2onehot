@@ -2,7 +2,6 @@
 # ----------------------------------------------------
 # Name        : df2onehot.py
 # Author      : E.Taskesen
-# Contact     : erdogant@gmail.com
 # github      : https://github.com/erdogant/df2onehot
 # Licence     : MIT
 # ----------------------------------------------------
@@ -13,10 +12,12 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder
 label_encoder = LabelEncoder()
 from tqdm import tqdm
+import logging
 
+logger = logging.getLogger(__name__)
 
 # %% Set dtypes
-def set_dtypes(df, dtypes='pandas', deep_extract=False, perc_min_num=None, num_if_decimal=True, verbose=3):
+def set_dtypes(df, dtypes='pandas', deep_extract=False, perc_min_num=None, num_if_decimal=True, verbose=None):
     """Set the dtypes of the dataframe.
 
     Parameters
@@ -32,10 +33,13 @@ def set_dtypes(df, dtypes='pandas', deep_extract=False, perc_min_num=None, num_i
         Force column (int or float) to be numerical if unique non-zero values are above percentage. The default is None. Alternative can be 0.8
     num_if_decimal : bool [False, True], optional
         Force column to be numerical if column with original dtype (int or float) show values with one or more decimals. The default is True.
-    verbose : int, optional
-        Print message to screen. The default is 3.
-        0: (default), 1: ERROR, 2: WARN, 3: INFO, 4: DEBUG, 5: TRACE
-
+    verbose : str or int, optional, default='info' (20)
+        Logging verbosity level. Possible values:
+        - 0, 60, None, 'silent', 'off', 'no' : no messages.
+        - 10, 'debug' : debug level and above.
+        - 20, 'info' : info level and above.
+        - 30, 'warning' : warning level and above.
+        - 50, 'critical' : critical level and above.
 
     Returns
     -------
@@ -47,26 +51,29 @@ def set_dtypes(df, dtypes='pandas', deep_extract=False, perc_min_num=None, num_i
     config['deep_extract'] = deep_extract
     config['perc_min_num'] = perc_min_num
     config['num_if_decimal'] = num_if_decimal
-    config['verbose'] = verbose
+    if verbose is not None:
+        logger.warning(f"Verbose is depricated as input parameter. This must be set using the logger.")
 
     # Determine dtypes for columns
-    config['dtypes'] = _auto_dtypes(df, config['dtypes'], deep_extract=config['deep_extract'], perc_min_num=config['perc_min_num'], num_if_decimal=config['num_if_decimal'], verbose=config['verbose'])
+    config['dtypes'] = _auto_dtypes(df, config['dtypes'], deep_extract=config['deep_extract'], perc_min_num=config['perc_min_num'], num_if_decimal=config['num_if_decimal'])
     # Setup dtypes in columns
-    df = _set_types(df.copy(), config['dtypes'], verbose=config['verbose'])
+    df = _set_types(df.copy(), config['dtypes'])
     # return
     return(df, config['dtypes'])
 
 
 # %% Setup columns in correct dtypes
-def _auto_dtypes(df, dtypes, deep_extract=False, perc_min_num=None, num_if_decimal=True, verbose=3):
+def _auto_dtypes(df, dtypes, deep_extract=False, perc_min_num=None, num_if_decimal=True, verbose=None):
+    if verbose is not None:
+        logger.warning(f"Verbose is depricated as input parameter. This must be set using the logger.")
+
     if isinstance(dtypes, str):
-        if verbose>=3: print('\n[df2onehot] >Auto detecting dtypes.')
-        disable = (True if (verbose==0 or verbose>3) else False)
+        logger.info(f"\nAuto detecting dtypes.")
         max_str_len = np.max(list(map(len, df.columns.values.astype(str).tolist())))
         dtypes = [''] * df.shape[1]
         logstr = '   '
 
-        for i in tqdm(range(0, df.shape[1]), disable=disable):
+        for i in tqdm(range(0, df.shape[1]), disable=disable_tqdm(), desc="[df2onehot]"):
             if 'float' in str(df.dtypes.iloc[i]):
                 dtypes[i]='num'
                 logstr = ('[float]')
@@ -103,7 +110,7 @@ def _auto_dtypes(df, dtypes, deep_extract=False, perc_min_num=None, num_if_decim
             else:
                 dtypes[i]='cat'
                 logstr = ('[???]  ')
-            
+
             # Force numerical if unique elements are above percentage
             if (perc_min_num is not None) and (('float' in str(df.dtypes.iloc[i])) or ('int' in str(df.dtypes.iloc[i]))):
                 tmpvalues = df.iloc[:,i].dropna().astype(float).copy()
@@ -128,24 +135,24 @@ def _auto_dtypes(df, dtypes, deep_extract=False, perc_min_num=None, num_if_decim
 
             try:
                 makespaces = ''.join([' '] * (max_str_len - len(df.columns[i])))
-                if verbose>=4: print('[df2onehot] >[%s]%s > %s > [%s] [%.0d]' %(df.columns[i], makespaces, logstr, dtypes[i], len(df.iloc[:,i].dropna().unique())))
+                logger.debug(f"[{df.columns[i]}]{makespaces} > {logstr} > [{dtypes[i]}] [{len(df.iloc[:,i].dropna().unique())}]")
             except:
-                if verbose>=4: print('[df2onehot] >[%s]%s > %s > [%s] [%.0d]' %(df.columns[i], makespaces, logstr, dtypes[i], len(df.iloc[:,i].dropna())))
+                logger.debug(f"[{df.columns[i]}]{makespaces} > {logstr} > [{dtypes[i]}] [{len(df.iloc[:,i].dropna())}]")
 
     # assert len(dtypes)==df.shape[1], 'Length of dtypes and dataframe columns does not match'
     return(dtypes)
 
 
 # %% Setup columns in correct dtypes
-def _set_types(df, dtypes, verbose=3):
+def _set_types(df, dtypes):
     assert len(dtypes)==df.shape[1], 'Number of dtypes and columns in df does not match'
-    if verbose>=3: print('[df2onehot] >Set dtypes in dataframe..')
+    logger.info(f"Set dtypes in dataframe..")
     max_str_len = np.max(list(map(len, df.columns.values.astype(str).tolist()))) + 2
 
     # remcols=[]
     for col, dtype in zip(df.columns, dtypes):
         makespaces = ''.join([' '] * (max_str_len - len(col)))
-        if verbose>=4: print('[df2onehot] >%s' %(col))
+        logger.debug(f"{col}")
 
         if dtype=='num':
             df[col]=df[col].astype(float)
@@ -156,8 +163,6 @@ def _set_types(df, dtypes, verbose=3):
             # df[col] = df[col].astype('category')
         elif dtype=='bool':
             Inull = df[col].isna().values
-            # @jjaycez: `pandas` does not allow to have None values in boolean columns
-            # @jjaycez: Implemented simpler logic suggested by Copilot review
             if Inull.any():
                 # Use pandas nullable boolean dtype to support missing values
                 df[col] = df[col].astype("boolean")
@@ -166,7 +171,7 @@ def _set_types(df, dtypes, verbose=3):
                 # No missing values: regular bool dtype is fine
                 df[col] = df[col].astype(bool)
         else:
-            if verbose>=5: print('[df2onehot] >[%s] %s > deep extract > [%s]' %(col, makespaces, dtype))
+            logger.debug(f"[{col}] {makespaces} > deep extract > [{dtype}]")
 
     return(df)
 
@@ -195,7 +200,7 @@ def set_y(y, y_min=None, numeric=False, verbose=3):
     y = y.astype(str)
 
     if not isinstance(y_min, type(None)):
-        if verbose>=3: print('[df2onehot] >Group [y] labels that contains less then %d occurences are grouped under one single name [_other_]' %(y_min))
+        logger.info(f"Group [y] labels that contains less than {y_min} occurrences are grouped under one single name [_other_]")
         [uiy, ycounts] = np.unique(y, return_counts=True)
         labx = uiy[ycounts<y_min]
         y = y.astype('O')
@@ -220,7 +225,7 @@ def _remove_non_ascii(dfc):
     dfc.loc[Iloc] = np.array(list(map(lambda x: str(x).encode('unicode_escape').decode('ascii','ignore').strip(), dfc.loc[Iloc])))
     # dfc.loc[Iloc] = dfc.loc[Iloc].replace(r'\W+', ' ', regex=True)
     dfc.loc[Iloc] = dfc.loc[Iloc].replace('[^\x00-\x7F]', ' ')
-    # Set the None back    
+    # Set the None back
     dfc.loc[~Iloc] = None
     # Bring back to origial dtype
     dfc = dfc.astype(dftype)
@@ -251,7 +256,12 @@ def is_DataFrame(data, verbose=3):
     elif isinstance(data, pd.DataFrame):
         pass
     else:
-        if verbose>=3: print('Typing should be pd.DataFrame()!')
+        logger.info(f"Typing should be pd.DataFrame()!")
         data=None
 
     return(data)
+
+
+def disable_tqdm():
+    """Set the logger for verbosity messages."""
+    return (True if (logger.getEffectiveLevel()>=30) else False)

@@ -13,7 +13,7 @@ class Testdf2onehot(unittest.TestCase):
         # Preprocessing
         cols_as_float = ['ProductRelated', 'Administrative']
         df[cols_as_float]=df[cols_as_float].astype(float)
-        dfhot = df2onehot(df, excl_background=['0.0', 'None', '?', 'False'], y_min=50, perc_min_num=0.8, remove_mutual_exclusive=True, verbose=4)['onehot']
+        dfhot = df2onehot(df, excl_background=['0.0', 'None', '?', 'False'], y_min=50, perc_min_num=0.8, remove_mutual_exclusive=True)['onehot']
         assert dfhot.shape == (12330, 55)
         
     def test_df2onehot(self):
@@ -124,5 +124,5 @@ class Testdf2onehot(unittest.TestCase):
                 df['alltrue_butone'] = 1
                 # jjaycez: Fixed ChainedAssignmentError
                 df.at[0, 'alltrue_butone'] = 0
-                out = df2onehot(df, y_min=y_min, verbose=0)
+                out = df2onehot(df, y_min=y_min)
                 assert np.all(out['onehot'].sum(axis=0) >= y_min)
