@@ -141,15 +141,15 @@ def df2onehot(df,
     max_str_len = np.minimum(np.max(list(map(len, df.columns.values.astype(str).tolist()))) + 2, maxstring)
 
     # Run over all columns
-    for i in tqdm(np.arange(0, df.shape[1]), disable=disable_tqdm(), desc="[df2onehot]"):
+    for i, _ in tqdm(enumerate(df), disable=disable_tqdm(), desc="[df2onehot]"):
         makespaces = ''.join(['.'] * np.minimum( (max_str_len - len(df.columns[i])), maxstring) )
         # Do not touch a float
         if 'float' in str(df.dtypes.iloc[i]):
             logger.debug(f"Processing: {df.columns[i][0:maxstring]}{makespaces} [float]")
             out_numeric[df.columns[i]] = df.iloc[:, i]
-            if hot_only is False:
-                out_onehot[df.columns[i]] = df.iloc[:, i]
-                labx.append(df.columns[i])
+            # if not hot_only:
+                # out_onehot[df.columns[i]] = df.iloc[:, i]
+                # labx.append(df.columns[i])
         else:
             integer_encoded = label_encoder.fit_transform(df.iloc[:, i])
             # If all values are the same, the encoder will return 0 (=False). We set values at 1 (by +1) and make them True. Otherwise it can be mis interpreted the the value was not present in the datset.
@@ -192,10 +192,11 @@ def df2onehot(df,
                 # @jjaycez Avoided warning about fragmented array by using a dictionary to store the columns and then
                 #   make a dataframe from the dictionary.
                 temp_cols = {}
-                for k in range(0, onehot_encoded.shape[1]):
+                # for k in range(0, onehot_encoded.shape[1]):
+                for k, _ in enumerate(onehot_encoded.T):
                     label = df.iloc[onehot_encoded[:, k] == 1, i].unique().astype(str)[0]
-                    if (isinstance(args['excl_background'], type(None))) or (
-                    not np.isin(label, args['excl_background'])):
+                    colname = f"{df.columns[i]}_{label}"
+                    if (isinstance(args['excl_background'], type(None))) or (not np.isin(label, args['excl_background'])):
                         # @jjaycez: It seems that one of the factors may return as a float, so ensuring string type...
                         colname = str(df.columns[i]) + '_' + str(label)
                         temp_cols[colname] = onehot_encoded[:, k].astype('bool')
@@ -208,7 +209,8 @@ def df2onehot(df,
                 # Make numerical vector
                 if onehot_encoded.shape[1]>2:
                     out_numeric[df.columns[i]] = (onehot_encoded * np.arange(1, onehot_encoded.shape[1] + 1)).sum(axis=1)
-    # @jjaycez: Single pd.concat outside of main loop
+
+    # @jjaycez: Single pd.concat outside of main loop   
     out_onehot = pd.concat(out_onehot_parts, axis=1) if out_onehot_parts else pd.DataFrame(index=df.index)
 
     uiy, ycounts = np.unique(labx, return_counts=True)
