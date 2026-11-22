@@ -7,6 +7,7 @@
 # ----------------------------------------------------
 
 # %% Libraries
+from datetime import datetime
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
@@ -112,6 +113,22 @@ def get_logger():
     """Return the package logger."""
     return logging.getLogger(PACKAGE_LOGGER_NAME)
 
+
+def log_prefix(level='INFO'):
+    """Return a logger-formatted prefix suitable for tqdm descriptions.
+
+    Examples
+    --------
+    >>> from hnet.utils import log_prefix
+    >>> print(log_prefix())
+    [15-11-2026 11:39:05] [hnet] [INFO]
+    """
+    return (
+        f'[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] '
+        f'[{logger.name}] '
+        f'[{level}]'
+    )
+
 # %% Set dtypes
 def set_dtypes(df, dtypes='pandas', deep_extract=False, perc_min_num=None, num_if_decimal=True, verbose=None):
     """Set the dtypes of the dataframe.
@@ -164,12 +181,12 @@ def _auto_dtypes(df, dtypes, deep_extract=False, perc_min_num=None, num_if_decim
         logger.warning(f"Verbose is depricated as input parameter. This must be set using the logger.")
 
     if isinstance(dtypes, str):
-        logger.info(f"Auto detecting dtypes.")
+        desc = f'{log_prefix()} Auto detecting dtypes'
         max_str_len = np.max(list(map(len, df.columns.values.astype(str).tolist())))
         dtypes = [''] * df.shape[1]
         logstr = '   '
 
-        for i in tqdm(range(0, df.shape[1]), disable=disable_tqdm(), desc="[df2onehot]"):
+        for i in tqdm(range(0, df.shape[1]), disable=disable_tqdm(), desc=desc):
             if 'float' in str(df.dtypes.iloc[i]):
                 dtypes[i]='num'
                 logstr = ('[float]')

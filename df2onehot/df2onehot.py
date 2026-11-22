@@ -21,18 +21,20 @@ import datazets as dz
 try:
     from df2onehot.utils import (
         set_dtypes,
-        set_logger as _set_logger,
-        get_logger as _get_logger,
-        disable_tqdm as _disable_tqdm,
-        convert_verbose_to_new as _convert_verbose_to_new,
+        set_logger,
+        get_logger,
+        disable_tqdm,
+        log_prefix,
+        convert_verbose_to_new,
     )
 except ImportError:
     from utils import (
         set_dtypes,
-        set_logger as _set_logger,
-        get_logger as _get_logger,
-        disable_tqdm as _disable_tqdm,
-        convert_verbose_to_new as _convert_verbose_to_new,
+        set_logger,
+        get_logger,
+        disable_tqdm,
+        log_prefix,
+        convert_verbose_to_new,
     )
 
 logger = logging.getLogger(__name__)
@@ -149,9 +151,10 @@ def df2onehot(df,
     out_onehot_parts = []
     out_onehot = pd.DataFrame()
     max_str_len = np.minimum(np.max(list(map(len, df.columns.values.astype(str).tolist()))) + 2, maxstring)
+    # logger.info(f'{log_prefix()} Start processing {df.shape[1]} columns')
 
     # Run over all columns
-    for i, _ in tqdm(enumerate(df), disable=disable_tqdm(), desc="[df2onehot]"):
+    for i, _ in tqdm(enumerate(df), disable=disable_tqdm()):
         makespaces = ''.join(['.'] * np.minimum( (max_str_len - len(df.columns[i])), maxstring) )
         # Do not touch a float
         if 'float' in str(df.dtypes.iloc[i]):
@@ -220,7 +223,7 @@ def df2onehot(df,
                 if onehot_encoded.shape[1]>2:
                     out_numeric[df.columns[i]] = (onehot_encoded * np.arange(1, onehot_encoded.shape[1] + 1)).sum(axis=1)
 
-    # @jjaycez: Single pd.concat outside of main loop   
+    # @jjaycez: Single pd.concat outside of main loop
     out_onehot = pd.concat(out_onehot_parts, axis=1) if out_onehot_parts else pd.DataFrame(index=df.index)
 
     uiy, ycounts = np.unique(labx, return_counts=True)
@@ -510,27 +513,6 @@ def make_elements_unique(X):
         X[Iloc] = [f"{element}_{index+1}" for index, element in enumerate(lst)]
     return X
 
-
-# %%
-def convert_verbose_to_new(verbose):
-    """Convert old verbosity values to the standardized log-level names."""
-    return _convert_verbose_to_new(verbose)
-
-
-def get_logger():
-    """Return effective logger level (backward compatible API)."""
-    return _get_logger().getEffectiveLevel()
-
-
-def set_logger(verbose: [str, int] = 'info', return_status: bool = False):
-    """Set logger level using the shared logging utilities."""
-    return _set_logger(verbose=verbose, return_status=return_status)
-
-
-
-def disable_tqdm():
-    """Return True when tqdm progress bars should be disabled."""
-    return _disable_tqdm()
 
 # %%
 # =============================================================================
