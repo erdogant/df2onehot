@@ -8,7 +8,6 @@
 
 # %% Libraries
 from packaging import version
-import warnings
 
 from tqdm import tqdm
 import numpy as np
@@ -20,9 +19,21 @@ from sklearn.preprocessing import OneHotEncoder
 import datazets as dz
 
 try:
-    from df2onehot.utils import set_dtypes
-except:
-    from utils import set_dtypes
+    from df2onehot.utils import (
+        set_dtypes,
+        set_logger as _set_logger,
+        get_logger as _get_logger,
+        disable_tqdm as _disable_tqdm,
+        convert_verbose_to_new as _convert_verbose_to_new,
+    )
+except ImportError:
+    from utils import (
+        set_dtypes,
+        set_logger as _set_logger,
+        get_logger as _get_logger,
+        disable_tqdm as _disable_tqdm,
+        convert_verbose_to_new as _convert_verbose_to_new,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +47,6 @@ else:
 
 # Set the label encoder
 label_encoder = LabelEncoder()
-warnings.filterwarnings('ignore')
 
 
 # %% Dataframe to one-hot
@@ -266,8 +276,8 @@ def _get_unique_elements(dfcol):
         listvector = sum(listvector, [])
         # All elements are converted to string!
         uifeat = np.unique(listvector)
-    except:
-        logger.error(f"Error catched.")
+    except Exception as exc:
+        logger.error(f"Failed to get unique elements: {exc}")
         uifeat = None
 
     return uifeat
@@ -474,16 +484,16 @@ def import_example(data='titanic', url=None, sep=',', overwrite=False):
     """
     if data=='complex':
         df = pd.DataFrame(index=np.arange(0, 25))
-        df['feat_1'] = np.nan
-        df['feat_1'].iloc[0] = ['3', 4]
-        df['feat_1'].iloc[2] = ['5', '6', '7', '8']
-        df['feat_1'].iloc[20] = ['9', '11', '4']
-        df['feat_1'].iloc[5] = 10
-        df['feat_1'].iloc[15] = 1
-        df['feat_2'] = np.nan
-        df['feat_2'].iloc[0] = ['4', '45']
-        df['feat_2'].iloc[15] = 1
-        df['feat_2'].iloc[20] = 10
+        df['feat_1'] = pd.Series([np.nan] * len(df), dtype='object')
+        df.at[0, 'feat_1'] = ['3', 4]
+        df.at[2, 'feat_1'] = ['5', '6', '7', '8']
+        df.at[20, 'feat_1'] = ['9', '11', '4']
+        df.at[5, 'feat_1'] = 10
+        df.at[15, 'feat_1'] = 1
+        df['feat_2'] = pd.Series([np.nan] * len(df), dtype='object')
+        df.at[0, 'feat_2'] = ['4', '45']
+        df.at[15, 'feat_2'] = 1
+        df.at[20, 'feat_2'] = 10
     else:
         df = dz.get(data=data, url=url, sep=sep, overwrite=overwrite)
 
@@ -503,94 +513,24 @@ def make_elements_unique(X):
 
 # %%
 def convert_verbose_to_new(verbose):
-    """Convert old verbosity to the new."""
-    # In case the new verbosity is used, convert to the old one.
-    if verbose is None: verbose=0
-    if not isinstance(verbose, str) and verbose<10:
-        status_map = {
-            'None': 'silent',
-            0: 'silent',
-            6: 'silent',
-            1: 'critical',
-            2: 'warning',
-            3: 'info',
-            4: 'debug',
-            5: 'debug'}
-        if verbose>=2: print('[df2onehot] WARNING use the standardized verbose status. The status [1-6] will be deprecated in future versions.')
-        return status_map.get(verbose, 0)
-    else:
-        return verbose
+    """Convert old verbosity values to the standardized log-level names."""
+    return _convert_verbose_to_new(verbose)
+
 
 def get_logger():
-    return logger.getEffectiveLevel()
+    """Return effective logger level (backward compatible API)."""
+    return _get_logger().getEffectiveLevel()
 
 
 def set_logger(verbose: [str, int] = 'info', return_status: bool = False):
-    """Set the logger for verbosity messages.
-
-    Parameters
-    ----------
-    verbose : str or int, optional, default='info' (20)
-        Logging verbosity level. Possible values:
-        - 0, 60, None, 'silent', 'off', 'no' : no messages.
-        - 10, 'debug' : debug level and above.
-        - 20, 'info' : info level and above.
-        - 30, 'warning' : warning level and above.
-        - 50, 'critical' : critical level and above.
-
-    Returns
-    -------
-    None.
-
-    > # Set the logger to warning
-    > set_logger(verbose='warning')
-    > # Test with different messages
-    > logger.debug("Hello debug")
-    > logger.info("Hello info")
-    > logger.warning("Hello warning")
-    > logger.critical("Hello critical")
-
-    """
-    # Convert verbose to new
-    verbose = convert_verbose_to_new(verbose)
-
-    # Set 0 and None as no messages.
-    if (verbose==0) or (verbose is None):
-        verbose=60
-    # Convert verbose to numeric level
-    if verbose in (0, None):
-        log_level = logging.CRITICAL + 10  # silent
-    elif isinstance(verbose, str):
-        levels = {
-            'silent': logging.CRITICAL + 10,
-            'off': logging.CRITICAL + 10,
-            'no': logging.CRITICAL + 10,
-            'debug': logging.DEBUG,
-            'info': logging.INFO,
-            'warning': logging.WARNING,
-            'error': logging.ERROR,
-            'critical': logging.CRITICAL,
-        }
-        log_level = levels.get(verbose.lower(), logging.INFO)
-    elif isinstance(verbose, int):
-        log_level = verbose
-    else:
-        log_level = logging.INFO
-
-    # Set package logger
-    logger = logging.getLogger('XXX')
-    logger.setLevel(log_level)
-    for handler in logger.handlers:
-        handler.setLevel(log_level)
-
-    if return_status:
-        return log_level
+    """Set logger level using the shared logging utilities."""
+    return _set_logger(verbose=verbose, return_status=return_status)
 
 
 
 def disable_tqdm():
-    """Set the logger for verbosity messages."""
-    return (True if (logger.getEffectiveLevel()>=30) else False)
+    """Return True when tqdm progress bars should be disabled."""
+    return _disable_tqdm()
 
 # %%
 # =============================================================================

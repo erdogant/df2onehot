@@ -9,11 +9,14 @@ from df2onehot.utils import (
  	set_dtypes,
  	is_DataFrame,
     set_y,
+    set_logger,
+    get_logger,
+    disable_tqdm,
 )
 
 __author__ = 'Erdogan Tasksen'
 __email__ = 'erdogant@gmail.com'
-__version__ = '1.2.3'
+__version__ = '1.2.4'
 
 # Setup root logger
 _logger = logging.getLogger('df2onehot')
