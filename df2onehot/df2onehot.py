@@ -386,24 +386,27 @@ def _extract_list(df, dtypes):
             makespaces = ''.join([' '] * (max_str_len - len(df.columns[idx])))
             # Convert str/float/int to list
             df.iloc[:, idx], uifeat = _col2type(df.iloc[:, idx])
+
+            extracted_cols = 0
             # Convert column into onehot
             if uifeat is not None:
                 dfc = _array2df(df, uifeat, idx)
+                extracted_cols = dfc.shape[1]
                 # Combine hot-dataframes into one big dataframe
                 dfout = _concat(dfout, dfc)
                 # Store the original label
-                label = label + [df.columns[idx]] * dfc.shape[1]
+                label = label + [df.columns[idx]] * extracted_cols
 
             # Add idx to remove
             idxrem.append(idx)
-            logger.debug(f"[{df.columns[idx]}]{makespaces} >deep extract > [{dtypes[idx]}]  [{dfc.shape[1]}]")
+            logger.debug(f"[{df.columns[idx]}]{makespaces} >deep extract > [{dtypes[idx]}]  [{extracted_cols}]")
 
     return dfout, label, idxrem
 
 
 # %%
 def _extract_combine(df, dtypes, dftot1, dftot2, idxrem1, idxrem2, label1, label2, perc_min_num):
-    if logger.debug: print('Deep extract merging..')
+    logger.debug('Deep extract merging..')
     # Drop columns that are expanded
     labels = df.columns.values
     idxrem = idxrem1 + idxrem2
