@@ -14,7 +14,103 @@ label_encoder = LabelEncoder()
 from tqdm import tqdm
 import logging
 
-logger = logging.getLogger(__name__)
+PACKAGE_LOGGER_NAME = 'df2onehot'
+logger = logging.getLogger(PACKAGE_LOGGER_NAME)
+
+# Optional TRACE level
+if not hasattr(logging, 'TRACE'):
+    logging.TRACE = 5
+    logging.addLevelName(logging.TRACE, 'TRACE')
+
+
+def convert_verbose_to_new(verbose):
+    """Convert legacy verbosity values to standardized log-level names."""
+    if verbose is None:
+        verbose = 0
+    if not isinstance(verbose, str) and verbose < 10:
+        status_map = {
+            0: 'silent',
+            1: 'critical',
+            2: 'warning',
+            3: 'info',
+            4: 'debug',
+            5: 'trace',
+            6: 'silent',
+            'None': 'silent',
+        }
+        if isinstance(verbose, int) and verbose >= 2:
+            logger.warning("Use standardized verbose levels; numeric legacy [1-6] will be deprecated.")
+        return status_map.get(verbose, 'silent')
+    return verbose
+
+
+def _coerce_log_level(verbose='info'):
+    """Normalize verbosity input to a logging level."""
+    verbose = convert_verbose_to_new(verbose)
+
+    if verbose is None or verbose in (0, 'silent', 'off', 'no', 'None'):
+        return logging.CRITICAL + 1
+
+    if isinstance(verbose, str):
+        name = verbose.strip().lower()
+        mapping = {
+            'silent': logging.CRITICAL + 1,
+            'off': logging.CRITICAL + 1,
+            'no': logging.CRITICAL + 1,
+            'critical': logging.CRITICAL,
+            'error': logging.ERROR,
+            'warning': logging.WARNING,
+            'warn': logging.WARNING,
+            'info': logging.INFO,
+            'debug': logging.DEBUG,
+            'trace': getattr(logging, 'TRACE', 5),
+        }
+        if name not in mapping:
+            raise ValueError(f"[{PACKAGE_LOGGER_NAME}] Unknown log level: {verbose}")
+        return mapping[name]
+
+    if isinstance(verbose, int):
+        if verbose >= 10:
+            return verbose
+        legacy = {
+            1: logging.CRITICAL,
+            2: logging.WARNING,
+            3: logging.INFO,
+            4: logging.DEBUG,
+            5: getattr(logging, 'TRACE', 5),
+            6: logging.CRITICAL + 1,
+        }
+        return legacy.get(verbose, logging.INFO)
+
+    raise TypeError(f"[{PACKAGE_LOGGER_NAME}] verbose must be str, int, or None; got {type(verbose)}")
+
+
+def _apply_level(name, level):
+    """Set *level* on logger *name* and all its existing child loggers."""
+    pkg = logging.getLogger(name)
+    pkg.setLevel(level)
+    for handler in pkg.handlers:
+        # Keep handlers permissive; logger level should control filtering.
+        handler.setLevel(logging.DEBUG)
+
+    prefix = name + '.'
+    for child_name in list(logging.Logger.manager.loggerDict):
+        if child_name.startswith(prefix):
+            logging.getLogger(child_name).setLevel(level)
+
+
+def set_logger(verbose: [str, int] = 'info', return_status: bool = False):
+    """Set logging level for df2onehot package and its submodules."""
+    level = _coerce_log_level(verbose)
+    _apply_level(PACKAGE_LOGGER_NAME, level)
+
+    if return_status:
+        return level
+
+
+def get_logger():
+    """Return the package logger."""
+    return logging.getLogger(PACKAGE_LOGGER_NAME)
 
 # %% Set dtypes
 def set_dtypes(df, dtypes='pandas', deep_extract=False, perc_min_num=None, num_if_decimal=True, verbose=None):
@@ -257,5 +353,5 @@ def is_DataFrame(data):
 
 
 def disable_tqdm():
-    """Set the logger for verbosity messages."""
-    return (True if (logger.getEffectiveLevel()>=30) else False)
+    """Return True when tqdm progress bars should be disabled (level >= WARNING)."""
+    return get_logger().getEffectiveLevel() >= logging.WARNING
