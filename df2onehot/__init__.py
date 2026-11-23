@@ -16,7 +16,7 @@ from df2onehot.utils import (
 
 __author__ = 'Erdogan Tasksen'
 __email__ = 'erdogant@gmail.com'
-__version__ = '1.2.4'
+__version__ = '1.3.0'
 
 # Setup root logger
 _logger = logging.getLogger('df2onehot')

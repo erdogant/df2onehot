@@ -299,6 +299,7 @@ def _get_unique_elements(dfcol):
 
     return uifeat
 
+
 def _array2df(df, uifeat, idx):
     # Lookup colname in the vector and make array
     dfcol = df.iloc[:, idx].apply(_findcol, cols=uifeat)
