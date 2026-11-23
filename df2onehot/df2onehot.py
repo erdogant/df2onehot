@@ -259,15 +259,9 @@ def _col2type(dfc):
     # Gather only the non-NaN rows
     dfcol = dfc.loc[~dfc.isna()].copy()
 
-    # Convert scalar str/float/int elements into lists
-    typing = list(map(type, dfcol.values))
-    Iloc = np.logical_or(
-        list(map(lambda x: isinstance(str(), x), typing)),
-        np.logical_or(
-            list(map(lambda x: isinstance(float(), x), typing)),
-            list(map(lambda x: isinstance(int(), x), typing))
-        )
-    )
+    # Convert scalar str/float/int/bool (including numpy scalar types) into lists
+    scalar_types = (str, float, int, bool, np.floating, np.integer, np.bool_)
+    Iloc = dfcol.map(lambda x: isinstance(x, scalar_types)).values
 
     if np.any(Iloc):
         # Convert scalar values to strings and wrap them in lists
@@ -283,12 +277,14 @@ def _col2type(dfc):
 
 def _get_unique_elements(dfcol):
     try:
-        # Flatten all non-empty lists
-        listvector = [
-            item
-            for row in dfcol
-            for item in row
-        ]
+        listvector = []
+
+        # Flatten list-like values; coerce unexpected scalar leftovers to strings
+        for row in dfcol:
+            if isinstance(row, (list, tuple, set, np.ndarray, pd.Series)):
+                listvector.extend(list(row))
+            else:
+                listvector.append(str(row))
 
         # Return an empty array when no elements are available
         if len(listvector) == 0:

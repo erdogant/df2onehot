@@ -76,3 +76,53 @@ def test_deep_extract_multiple_list_columns_with_empty_values():
     assert len(out['dtypes']) == out['df'].shape[1]
 
     assert {'1', '2', 'ID', 'blue', 'red'}.issubset(set(out['df'].columns))
+
+
+def test_deep_extract_list_with_numpy_scalar_value():
+
+    df = pd.DataFrame({
+        'ID': [1, 2, 3],
+        'features': [
+            ['red'],
+            np.int64(2),
+            np.nan,
+        ],
+    })
+
+    out = df2onehot.df2onehot(
+        df,
+        deep_extract=True,
+        y_min=1,
+        verbose=0,
+    )
+
+    assert set(out['df'].columns) == {'ID', '2', 'red'}
+    assert out['df']['2'].tolist() == [False, True, False]
+    assert out['df']['red'].tolist() == [True, False, False]
+    assert len(out['labels']) == out['df'].shape[1]
+    assert len(out['dtypes']) == out['df'].shape[1]
+
+
+def test_deep_extract_list_with_bool_scalar_value():
+
+    df = pd.DataFrame({
+        'ID': [1, 2, 3],
+        'features': [
+            ['red'],
+            True,
+            np.nan,
+        ],
+    })
+
+    out = df2onehot.df2onehot(
+        df,
+        deep_extract=True,
+        y_min=1,
+        verbose=0,
+    )
+
+    assert set(out['df'].columns) == {'ID', 'True', 'red'}
+    assert out['df']['True'].tolist() == [False, True, False]
+    assert out['df']['red'].tolist() == [True, False, False]
+    assert len(out['labels']) == out['df'].shape[1]
+    assert len(out['dtypes']) == out['df'].shape[1]
