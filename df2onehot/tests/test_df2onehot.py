@@ -126,3 +126,5 @@ class Testdf2onehot(unittest.TestCase):
                 df.at[0, 'alltrue_butone'] = 0
                 out = df2onehot(df, y_min=y_min)
                 assert np.all(out['onehot'].sum(axis=0) >= y_min)
+
+

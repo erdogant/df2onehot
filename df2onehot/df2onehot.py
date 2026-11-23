@@ -254,37 +254,54 @@ def df2onehot(df,
 
 # %% Convert str/float/int to type
 def _col2type(dfc):
-    # dtype = dtypes[idx]
-    # Gather only the not NaN rows
-    Inan = dfc.isna()
-    # Grap only unique elements from the combined set of lists
-    dfcol = dfc.iloc[~Inan.values].copy()
-    # If any str, float or int elements is fount, convert to list
-    typing = list(map(type, dfcol.values))
-    Iloc = np.logical_or(list(map(lambda x: isinstance(str(), x), typing)), np.logical_or(list(map(lambda x: isinstance(float(), x), typing)), list(map(lambda x: isinstance(int(), x), typing))))
-    if np.any(Iloc):
-        # Convert to string! This is required because the colnames also converts all to string.
-        dfcol.loc[Iloc] = list(map(lambda x: [str(x)], dfcol.loc[Iloc]))
-        dfc.iloc[dfcol.loc[Iloc].index] = dfcol.loc[Iloc]
+    dfc = dfc.copy()
 
-    # Get all unique elements
+    # Gather only the non-NaN rows
+    dfcol = dfc.loc[~dfc.isna()].copy()
+
+    # Convert scalar str/float/int elements into lists
+    typing = list(map(type, dfcol.values))
+    Iloc = np.logical_or(
+        list(map(lambda x: isinstance(str(), x), typing)),
+        np.logical_or(
+            list(map(lambda x: isinstance(float(), x), typing)),
+            list(map(lambda x: isinstance(int(), x), typing))
+        )
+    )
+
+    if np.any(Iloc):
+        # Convert scalar values to strings and wrap them in lists
+        idx = dfcol.index[Iloc]
+        dfcol.loc[idx] = dfcol.loc[idx].map(lambda x: [str(x)])
+        dfc.loc[idx] = dfcol.loc[idx]
+
+    # Get unique elements
     uifeat = _get_unique_elements(dfcol)
-    # Return
-    return(dfc, uifeat)
+
+    return dfc, uifeat
+
 
 def _get_unique_elements(dfcol):
     try:
-        # Get all unique elements
-        listvector = list(map(lambda x: list(x) , dfcol))
-        listvector = sum(listvector, [])
-        # All elements are converted to string!
+        # Flatten all non-empty lists
+        listvector = [
+            item
+            for row in dfcol
+            for item in row
+        ]
+
+        # Return an empty array when no elements are available
+        if len(listvector) == 0:
+            return np.array([], dtype=str)
+
+        # Get unique elements
         uifeat = np.unique(listvector)
-    except Exception as exc:
-        logger.error(f"Failed to get unique elements: {exc}")
+
+    except Exception as e:
+        logger.error(f"Error extracting unique elements: {e}")
         uifeat = None
 
     return uifeat
-
 
 def _array2df(df, uifeat, idx):
     # Lookup colname in the vector and make array
@@ -385,78 +402,109 @@ def _extract_dict(df, dtypes):
 # %%
 def _extract_list(df, dtypes):
     logger.info(f"Deep extraction of lists..")
+
     Ilist = np.isin(dtypes, 'list')
-    dfout = pd.DataFrame()
+    dfout = pd.DataFrame(index=df.index)
     idxrem = []
     label = []
 
-    # Expand list
     if np.any(Ilist):
         idxCol = np.where(Ilist)[0]
         max_str_len = np.max(list(map(len, df.columns[idxCol].values.astype(str).tolist())))
-        # Expand every columns that contains either list
+
         for idx in tqdm(idxCol, disable=disable_tqdm(), desc='[df2onehot]'):
             makespaces = ''.join([' '] * (max_str_len - len(df.columns[idx])))
-            # Convert str/float/int to list
+
+            # Convert column into lists and obtain unique elements
             df.iloc[:, idx], uifeat = _col2type(df.iloc[:, idx])
-
-            extracted_cols = 0
-            # Convert column into onehot
-            if uifeat is not None:
+            # Initialize empty dataframe
+            dfc = pd.DataFrame(index=df.index)
+            # Expand only when elements are available
+            if uifeat is not None and len(uifeat) > 0:
                 dfc = _array2df(df, uifeat, idx)
-                extracted_cols = dfc.shape[1]
-                # Combine hot-dataframes into one big dataframe
+                # Combine extracted dataframes
                 dfout = _concat(dfout, dfc)
-                # Store the original label
-                label = label + [df.columns[idx]] * extracted_cols
+                # Store original label
+                label += [df.columns[idx]] * dfc.shape[1]
 
-            # Add idx to remove
+            # Add column index to remove
             idxrem.append(idx)
-            logger.debug(f"[{df.columns[idx]}]{makespaces} >deep extract > [{dtypes[idx]}]  [{extracted_cols}]")
+            logger.debug(f"[{df.columns[idx]}]{makespaces} >deep extract > [list] [{dfc.shape[1]}]")
 
     return dfout, label, idxrem
 
-
 # %%
 def _extract_combine(df, dtypes, dftot1, dftot2, idxrem1, idxrem2, label1, label2, perc_min_num):
+
     logger.debug('Deep extract merging..')
-    # Drop columns that are expanded
-    labels = df.columns.values
-    idxrem = idxrem1 + idxrem2
-    if len(idxrem)>0:
-        # Remove the extracted column names from list and dict
-        idxkeep = np.setdiff1d(np.arange(0, df.shape[1]), idxrem)
-        df.drop(labels = df.columns[idxrem].values, axis=1, inplace=True)
-        dtypes = np.array(dtypes)
-        dtypes = list(dtypes[idxkeep])
-        # Combine the extracted list and dict data
-        dftot = pd.concat([dftot1, dftot2], axis=1)
-        labeltot = label1 + label2
-        # Remove repetative column names
+
+    # Combine indices of columns that were expanded
+    idxrem = np.unique(idxrem1 + idxrem2).astype(int)
+
+    # Keep columns that were not expanded
+    idxkeep = np.setdiff1d(np.arange(df.shape[1]), idxrem)
+
+    # Preserve remaining dataframe columns
+    df = df.iloc[:, idxkeep].copy()
+
+    # Preserve corresponding dtypes
+    dtypes = list(np.asarray(dtypes)[idxkeep])
+
+    # Combine extracted dataframes
+    dftot = pd.concat([dftot1, dftot2], axis=1)
+    labeltot = label1 + label2
+
+    # Only process extracted columns when they exist
+    if dftot.shape[1] > 0:
+
+        # Remove duplicate column names
         dftot, labeltot = _make_columns_unique(dftot, labeltot)
+
+        # Check label alignment
+        if len(labeltot) != dftot.shape[1]:
+            raise Exception('[df2onehot] Error: extracted labels and dataframe columns do not match.')
+
         # Set dtypes
         dftot, dtypest = set_dtypes(dftot, perc_min_num=perc_min_num, deep_extract=False)
-        # Combine into dataframe
-        dflabels = df.columns.values
+
+        # Append extracted columns
         df = pd.concat([df, dftot], axis=1)
-        dtypes = dtypes + dtypest
-        labels = list(dflabels) + labeltot
-        logger.info('\nDeep extract extracted: [%d] features.' %(dftot1.shape[1] + dftot2.shape[1]))
+        dtypes += list(dtypest)
+
+        # Append corresponding original labels
+        labels = list(df.columns[:len(idxkeep)]) + labeltot
+
+    else:
+        # No extracted features: retain only original columns
+        labels = list(df.columns)
+
+    # Validate alignment
+    if df.shape[1] != len(dtypes):
+        raise Exception('[df2onehot] Error: dataframe columns and dtypes do not match.')
+
+    if df.shape[1] != len(labels):
+        raise Exception('[df2onehot] Error: dataframe columns and labels do not match.')
+
+    logger.info('\nDeep extract extracted: [%d] features.' % (dftot1.shape[1] + dftot2.shape[1]))
+    
     return df, dtypes, labels
 
 
 # %% Remove repetative column
 def _make_columns_unique(dftot, labeltot):
-    columns = dftot.columns.value_counts()
-    columns = columns[columns.values>1].index.values
-    logger.debug(f"[{len(columns)}] repetative columns detected: {columns}")
+    # Convert column names to strings
+    dftot.columns = dftot.columns.astype(str)
 
-    _, uiidx = np.unique(dftot.columns, return_index=True)
-    uiidx = np.sort(uiidx)
-    dftot = dftot.iloc[:, uiidx]
-    labeltot = list(np.array(labeltot)[uiidx])
+    # Identify duplicate columns, keeping the first occurrence
+    Iloc = ~dftot.columns.duplicated(keep='first')
 
-    if len(labeltot)!=dftot.shape[1]: raise Exception('[df2onehot] Error: The total labels and combined dataframe has not same size.')
+    # Keep corresponding dataframe columns and labels
+    dftot = dftot.iloc[:, Iloc]
+    labeltot = list(np.asarray(labeltot, dtype=object)[Iloc])
+
+    if len(labeltot) != dftot.shape[1]:
+        raise Exception('[df2onehot] Error: The total labels and combined dataframe have different sizes.')
+
     return dftot, labeltot
 
 

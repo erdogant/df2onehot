@@ -4,6 +4,55 @@
 # print(df2onehot.__version__)
 # Import libraries
 
+# %%
+import pandas as pd
+import numpy as np
+import df2onehot
+
+df = pd.DataFrame({
+    'ID': [1, 2, 3, 4, 5, 6],
+    'colors': [
+        ['red', 'blue'],
+        [],
+        ['green'],
+        ['red'],
+        [],
+        np.nan
+    ],
+    'numbers': [
+        [1, 2],
+        [2, 3],
+        [],
+        [1],
+        [3, 4],
+        np.nan
+    ],
+    'category': ['A', 'B', 'A', 'C', 'B', 'A']
+})
+
+print(df)
+
+out = df2onehot.df2onehot(df, deep_extract=True, y_min=1, verbose='debug')
+
+print(out['df'])
+print(out['onehot'])
+print(out['numeric'])
+
+# %%
+df_empty = pd.DataFrame({
+    'ID': [1, 2, 3],
+    'features': [[], [], []]
+})
+
+out = df2onehot.df2onehot(
+    df_empty,
+    deep_extract=True,
+    y_min=1
+)
+
+print(out['df'])
+print(out['onehot'])
+
 # %% Load example
 from df2onehot import df2onehot, import_example
 df = import_example(data="titanic")
