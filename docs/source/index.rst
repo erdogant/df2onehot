@@ -47,6 +47,7 @@ Content
   :caption: Documentation
   
   Documentation
+  CHANGELOG
   Coding quality
   df2onehot.df2onehot
 
